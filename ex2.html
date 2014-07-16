@@ -235,6 +235,7 @@ progress::-webkit-progress-value {
 
 	var file = 0;
 	var bar = d3.select("#progBar");
+	var actualProp = 10;
 	
 	var getFile = function(){
 		d3.json("http://wikisensing.org/WikiSensingServiceAPI/DCESensorDeployment2f7M76vkKdRlvm7vVWg/Node_" + (file+1), function(error, json) {
@@ -245,7 +246,7 @@ progress::-webkit-progress-value {
 			if(file == 15){
 				bar.style("display","none");
 				createOption();
-				createGraphs(10);
+				createGraphs(actualProp);
 			}
 			else if(file < 15)
 				getFile();
@@ -260,7 +261,10 @@ progress::-webkit-progress-value {
 					.append("option")
 					.text(d.fieldName);
 				});
+		d3.select("#Properties option:nth-child("+(actualProp-1)+")").attr("selected","selected");
 	}
+	
+
 		
 	var list = document.getElementById('Properties');
 	var switchButton1 = document.getElementById('switchButton1'),
@@ -281,11 +285,11 @@ progress::-webkit-progress-value {
 		document.getElementById('comparisonChart').style.display = "none";
 		document.getElementById('charts').style.display = "block";
 		svg.remove();
-		createGraphs(10);
+		createGraphs(actualProp);
 	 }, true);
 	
 	list.addEventListener('change', function() {
-		//alert(list.selectedIndex); 
+		actualProp = list.selectedIndex+2;
 		svg.remove();
 		createGraphs(list.selectedIndex+2);
 	 }, true);
