@@ -15,15 +15,7 @@
 	var formatValue = d3.format(",.2f");
 	var formatDate = function(d) { return formatValue(d) ; };
 	var taillePas = 5; // height of the gradient line => the bigger it is, the less precise it will be ((has to be integer > 0)
-	
-	//Listening Button
-	
-	var launchButton = document.getElementById('launch');
-	launchButton.addEventListener('click', function() {
-		createTimeRepresentation(0,1000,10,100);
-	 }, true);
-	
-	
+		
 	//Loading Data
 	
 	var data = new Array(); // a global
@@ -49,34 +41,26 @@
 	
 	//End Loading Data
 	
-	// Initializing ...
-	var min,max,color,svg;
+	var min, max, color, svg, active, numRepresentation;
+
 	
-	var initialize = function(){
-		data.forEach(function(c,i) {
-			c.sensorRecords.forEach(function(d) {
-				d.date = parseDate(d.sensorObject[1].value);
-				d.x = distance.x*parseInt(i%5);
-				d.y = distance.y*parseInt(i/5);
-				d.prop = parseFloat(d.sensorObject[16].value);
-			});
-			c.sensorRecords.sort(function(a, b) {
-				return a.date - b.date;
-			});
-		});
-		
+	//Function creating scale and axis
+	
+	var initColorAndScale = function(){
+	
 		//Define range and color range
-		
+	
 		min = d3.min(data, function(c) { return d3.min(c.sensorRecords, function(d) { return d.prop; }); });
 		max = d3.max(data, function(c) { return d3.max(c.sensorRecords, function(d) { return d.prop; }); });
 		color = d3.scale.linear()
 			.domain([min,min+(max-min)/4,(min+max)/2,min+3*(max-min)/4,max])
 			.range(["blue", "#27f600", "yellow","orange","red"]);
 		
-		svg = d3.select("body").append("svg")
-				.attr("width", width)
-				.attr("height", height);
-
+		//Remove gradient and scale if existing
+		
+		d3.select("#scale-gradient").remove();
+		d3.select("#scale").remove();
+		
 		// Draw Scale
 		
 		var dataGradient = new Array();
@@ -103,13 +87,86 @@
 			.orient("left");
 		
 		svg.append("g")
-		  .attr("class", "scale")
+		  .attr("id", "scale")
 		  .attr("transform", "translate(" + parseInt(10+0.95*width) + ",10)")
 		  .call(scaleAxis)
 		  .append("rect")
 			.attr("width", parseInt(0.05*width))
 			.attr("height", heightScale)
 			.attr("fill", "url(#scale-gradient)");
+	}
+		
+	
+	// Initializing ...
+	
+	var initialize = function(){
+		
+		numRepresentation = 0;
+		active = false;
+		
+		//Listening Button
+	
+		var launchButton = document.getElementById('launch');
+		launchButton.addEventListener('click', function() {
+			if(active == false){
+				launchButton.innerHTML = "Stop";
+				createTimeRepresentation(0,1000,10,100);
+			}
+			else{
+				active = false;
+				launchButton.innerHTML = "Launch";
+			}
+		 }, true);
+		
+		//Create variable for more practical use
+	
+		data.forEach(function(c,i) {
+			c.sensorRecords.forEach(function(d) {
+				d.date = parseDate(d.sensorObject[1].value);
+				d.x = distance.x*parseInt(i%5);
+				d.y = distance.y*parseInt(i/5);
+				d.prop = parseFloat(d.sensorObject[10].value);
+			});
+			c.sensorRecords.sort(function(a, b) {
+				return a.date - b.date;
+			});
+			
+		});
+		
+		//Create options in the form
+		
+		data[0].sensorRecords[0].sensorObject.forEach(function(d) {
+			if(d.fieldName != "User" && d.fieldName != "Created")
+				d3.selectAll("body form select")
+				.append("option")
+				.text(d.fieldName);
+			});
+			
+		//Select initial property selected
+				
+		d3.select("#Properties option:nth-child("+(10-1)+")").attr("selected","selected");
+
+		//Listen to the form
+		
+		var list = document.getElementById('Properties');
+		list.addEventListener('change', function() {
+			data.forEach(function(c,i) {
+				c.sensorRecords.forEach(function(d) {
+					d.prop = parseFloat(d.sensorObject[(list.selectedIndex+2)].value);
+				});
+			});
+			initColorAndScale();
+		}, true);
+		
+		//Create SVG
+		
+		svg = d3.select("body").append("svg")
+				.attr("width", width)
+				.attr("height", height);
+				
+		//Define range, color range and and create scale
+		
+		initColorAndScale();
 	}
 	
 	//Function for creating a color map at the time index given (between 1 and 1000)
@@ -206,15 +263,27 @@
 		
 	}
 	
+	// Auxiliary function to stop time representation
+	
+	var triggeredByTimer = function(time, num, end){
+		if(numRepresentation == num && active == true)
+			createRepresentation(time);
+		if(end-1 == time)
+			active = false;
+	}
+	
 	//Function to create an Animation, n.b.: here a closure is needed to keep the 
 	
 	var createTimeRepresentation = function(start,end, pas, timePas){
+		numRepresentation++;
+		active = true;
+		
 		for(var i = start ; i < end ; i+=pas)
 		{
 			setTimeout(
-					(function(f){
-						return function(){ createRepresentation(f);};
-					})(i)
+					(function(f,g,h){
+						return function(){ triggeredByTimer(f,g,h);};
+					})(i,numRepresentation,end)
 					,timePas*(i-start));	
 		}
 	}
