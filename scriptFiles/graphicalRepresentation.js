@@ -1,16 +1,26 @@
-﻿	var distance = {x : 4.5, y : 5};
+﻿	var w = window,
+		d = document,
+		e = d.documentElement,
+		g = d.getElementsByTagName('body')[0],
+		W = w.innerWidth || e.clientWidth || g.clientWidth,
+		H = w.innerHeight|| e.clientHeight|| g.clientHeight;
+		
+	var width = W*0.95,
+		height = H*0.9;
+		
+	var distance = {x : 4.5, y : 5};
+	var dimension = {x : parseInt(0.9*width/4), y : parseInt(0.9*height/2)};
+
 	var parseDate = d3.time.format("%Y-%m-%dT%H:%M:%SZ").parse;
 	var formatValue = d3.format(",.2f");
-		
 	var formatDate = function(d) { return formatValue(d) ; };
-	var dimension = {x : distance.x*75, y : distance.y*75};
-	var taillePas = 2;
+	var taillePas = 5; // height of the gradient line => the bigger it is, the less precise it will be ((has to be integer > 0)
 	
 	//Listening Button
 	
 	var launchButton = document.getElementById('launch');
 	launchButton.addEventListener('click', function() {
-		createTimeRepresentation(0,1000,10);
+		createTimeRepresentation(0,1000,10,100);
 	 }, true);
 	
 	
@@ -55,6 +65,8 @@
 			});
 		});
 		
+		//Define range and color range
+		
 		min = d3.min(data, function(c) { return d3.min(c.sensorRecords, function(d) { return d.prop; }); });
 		max = d3.max(data, function(c) { return d3.max(c.sensorRecords, function(d) { return d.prop; }); });
 		color = d3.scale.linear()
@@ -62,8 +74,42 @@
 			.range(["blue", "#27f600", "yellow","orange","red"]);
 		
 		svg = d3.select("body").append("svg")
-				.attr("width", 1500)
-				.attr("height", 900);;
+				.attr("width", width)
+				.attr("height", height);
+
+		// Draw Scale
+		
+		var dataGradient = new Array();
+		var crl = color.range().length;
+		for(var j = 0 ; j < crl ; j++){
+			dataGradient[j] = {offset: parseInt(j*100/(crl-1)) + "%", color: color.range()[j]}
+		}
+		
+		svg.append("linearGradient")                
+			.attr("id", "scale-gradient")            
+			.attr("x1", "0%").attr("y1", "100%")         
+			.attr("x2", "0%").attr("y2", "0%")
+			.selectAll("stop")
+			.data(dataGradient)      
+			.enter().append("stop")         
+			.attr("offset", function(d) { return d.offset; })   
+			.attr("stop-color", function(d) { return d.color; });
+		
+		var heightScale = parseInt(2*dimension.y);
+		
+		var scaleAxis = d3.svg.axis()
+			.ticks(5)
+			.scale(d3.scale.linear().domain([min,max]).range([heightScale,0]))
+			.orient("left");
+		
+		svg.append("g")
+		  .attr("class", "scale")
+		  .attr("transform", "translate(" + parseInt(10+0.95*width) + ",10)")
+		  .call(scaleAxis)
+		  .append("rect")
+			.attr("width", parseInt(0.05*width))
+			.attr("height", heightScale)
+			.attr("fill", "url(#scale-gradient)");
 	}
 	
 	//Function for creating a color map at the time index given (between 1 and 1000)
@@ -77,13 +123,8 @@
 			])
 			.range(["blue", "red"]);
 			//*/
-		//*
-		if(svg)	svg.remove();
-		svg = d3.select("body").append("svg")
-				.attr("width", 1500)
-				.attr("height", 900);	
 		
-		
+		d3.selectAll(".group").remove();	
 		var gr = svg.append("g").attr("index",time).attr("class","group");
 		
 		var vInterpolator = new Array;
@@ -105,7 +146,7 @@
 		var v = new Array();
 		var k;
 		
-		for(i = 0 ; i < dimension.y*2 ; i++){
+		for(i = 0 ; i < dimension.y*2 ; i+=taillePas){
 			var row = parseInt(i/dimension.y);
 			
 			for(var j = 0 ; j < 5 ; j++){
@@ -167,13 +208,13 @@
 	
 	//Function to create an Animation, n.b.: here a closure is needed to keep the 
 	
-	var createTimeRepresentation = function(start,end, pas){
+	var createTimeRepresentation = function(start,end, pas, timePas){
 		for(var i = start ; i < end ; i+=pas)
 		{
 			setTimeout(
 					(function(f){
 						return function(){ createRepresentation(f);};
 					})(i)
-					,100*(i-start));	
+					,timePas*(i-start));	
 		}
 	}
