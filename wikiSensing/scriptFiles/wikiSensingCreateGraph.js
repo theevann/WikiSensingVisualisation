@@ -114,13 +114,13 @@
 			.datum(data.sensorRecords)
 			.attr("class", "line")
 			.attr("d", line[0])
-			.style("stroke", function(d) { return colors(parseInt(Math.random()*10)+1); });
+			.style("stroke", "#1f77b4");
 		
 		if(p2 != 0)
 		gr.append("path")
 			.datum(data.sensorRecords)
 			.attr("class", "line")
 			.attr("d", line[1])
-			.style("stroke", function(d) { return colors(parseInt(Math.random()*10)+11); });
+			.style("stroke", "#ff7f0e");
 		
 	};

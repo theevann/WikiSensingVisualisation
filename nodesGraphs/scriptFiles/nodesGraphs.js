@@ -364,7 +364,7 @@
 	var gr,p1=10,p2=14;
 	
 	var createComparisonGraph = function(){
-		width = e.clientWidth - 2*parseInt(window.getComputedStyle(document.querySelector('body')).marginTop) - parseInt(window.getComputedStyle(document.getElementById('menuComparison')).marginLeft) - parseInt(window.getComputedStyle(document.getElementById('menuComparison')).marginRight) - document.getElementById('menuComparison').getBoundingClientRect().width ;
+		width = 0.99*(e.clientWidth - 2*parseInt(window.getComputedStyle(document.querySelector('body')).marginRight) - parseInt(window.getComputedStyle(document.getElementById('menuComparison')).marginLeft) - parseInt(window.getComputedStyle(document.getElementById('menuComparison')).marginRight) - document.getElementById('menuComparison').getBoundingClientRect().width);
 		height = H*0.9;
 		
 		var oneGraphHeight = 0.9*height;

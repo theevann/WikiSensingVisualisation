@@ -1,5 +1,4 @@
-﻿
-.line{
+﻿.line{
   fill: none;
   stroke-width: 1.5px;
 }
@@ -18,13 +17,11 @@
 	font-size: 2em;
 	background-color: #aec3fc;
 	border-radius: 10px;
-	box-shadow: 3px 3px 6px 0 #A9A9A9;;
+	box-shadow: 3px 3px 6px 0 #A9A9A9;
 	padding: 0.2em 0em;
+	margin-bottom: 0.5em;
 }
 
 #menu{
-	margin: 1em;
-	/*position:absolute;
-	left:1em;
-	top:0.1em;*/
+	margin-bottom: 2em;
 }
