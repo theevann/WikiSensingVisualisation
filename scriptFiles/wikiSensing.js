@@ -3,7 +3,8 @@
 	var idTS;
 	var form1 = document.getElementById('choice1');
 	var form2 = document.getElementById('choice2');
-	var form3 = document.getElementById('choice3');
+	var form3_1 = document.getElementById('choice3_1');
+	var form3_2 = document.getElementById('choice3_2');
 	var parseDate = d3.time.format("%Y-%m-%dT%H:%M:%SZ").parse;
 
 
@@ -51,19 +52,57 @@
 			data = json;
 			console.log (data);
 			
-			data.sensorRecords.forEach(function(c) {
-					d.date = parseDate(d.sensorObject[idTS].value);
-					//d.prop = parseFloat(d.sensorObject[10].value); Pas ici
+			findIndexTimeStamp();
+			data.sensorRecords.forEach(function(d) {
+				d.date = parseDate(d.sensorObject[idTS].value);
 			});
 			
 			data.sensorRecords.sort(function(a, b) {
-					return a.date - b.date;
+				return a.date - b.date;
 			});
+			
+			updateForms3();
 		});
 	}
 	
-	var updateForm3() = function(){
-		
+	var updateForms3 = function(){
+		//Remove previous options
+		d3.selectAll("#choice3_1 option").remove();
+		d3.selectAll("#choice3_2 option").remove();
+	
+		//Add new options
+		var choice3 = d3.selectAll("#choice3_1, #choice3_2");
+		choice3.append("option")
+			   .text("None");
+		data.sensorRecords[0].sensorObject.forEach(function(d) {
+			if(d.fieldName != "User")
+				choice3.append("option")
+				   .text(d.fieldName);
+		});
+	}
+	
+	var createProperty1 = function(id){
+		if(id != 0){
+			data.sensorRecords.forEach(function(d) {
+					d.prop1 = parseFloat(d.sensorObject[id].value);
+			});
+		}
+	}
+	
+	var createProperty2 = function(id){
+		if(id != 0){
+			data.sensorRecords.forEach(function(d) {
+					d.prop2 = parseFloat(d.sensorObject[id].value);
+			});
+		}
+	}
+	
+	var findIndexTimeStamp = function(){
+		data.sensorRecords[0].sensorObject.forEach(function(d,i) {
+				if(d.fieldName == "TimeStamp")
+					idTS = i;
+		});
+		console.log("TimeStamp : " + idTS);
 	}
 	
 	var initialize = function(){
@@ -77,9 +116,21 @@
 			loadData();	
 		}, true);
 		
+		//Listen to forms 3
+		form3_1.addEventListener('change', function() {
+			createProperty1(form3_1.selectedIndex);
+			createGraph(form3_1.selectedIndex, form3_2.selectedIndex);
+		}, true);
+		
+		form3_2.addEventListener('change', function() {
+			createProperty2(form3_2.selectedIndex);
+			createGraph(form3_1.selectedIndex, form3_2.selectedIndex);	
+		}, true);
+		
 		//Initial loading of form 1
 		loadForm1();
 	}
 	
 	initialize();
+	
 	

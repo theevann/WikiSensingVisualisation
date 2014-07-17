@@ -5,7 +5,8 @@
 	<title>Sensors Dashboard</title>
 	<script src="http://d3js.org/d3.v3.min.js"></script>
 	<script src="d3-transform.js"></script>
-	<link rel="stylesheet" type="text/css" href="cssFiles/graphicalRepresentation.css" />
+	<script src="scriptFiles\wikiSensingCreateGraph.js"></script>
+	<link rel="stylesheet" type="text/css" href="cssFiles/wikiSensing.css" />
 </head>
 
 <body>	
@@ -14,10 +15,13 @@
 		</SELECT>
 		<SELECT id="choice2" size="1">
 		</SELECT>
-		<SELECT id="choice3" size="1">
+		<SELECT id="choice3_1" size="1">
+		</SELECT>
+		<SELECT id="choice3_2" size="1">
 		</SELECT>
 	</FORM>
 	
+	<div id="chart"></div>
 	
 	<div id="progress" style="display:none;">
 		<progress value="0" max="15" id="progBar">
