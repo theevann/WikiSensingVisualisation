@@ -1,0 +1,90 @@
+﻿<!doctype html>
+<html>
+
+<head>
+	<title>Nodes Dashboard</title>
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+	<script src="scriptFiles\d3-transform.js"></script>
+	<link rel="stylesheet" type="text/css" href="cssFiles/wikiSensing.css" />
+</head>
+<body>
+	<div id="header">
+		<span id="title">Nodes</span>
+		<div id="menu1">
+			<FORM style="display:inline-block;">
+				<SELECT id="Properties" size="1">
+				</SELECT>
+			</FORM>
+			<button id="switchButton1">Switch to comparison tab</button>
+		</div>
+		<div id="menu2">
+			<button id="switchButton2">Switch to charts tab</button>
+		</div>
+	</div>
+	
+	<div id="progress">
+		<progress value="0" max="15" id="progBar">
+		<span id="downloadProgress">
+		Retrieving Data ...
+		</span>
+		</progress>
+	</div>
+	
+	<div id="charts"></div>
+	
+	<div id="comparisonChart">
+		<div id="menuComparison">
+			<FORM style="display:block;">
+				<em>Select Properties:</em>
+				<label for="PropertiesComp1" style="margin-top:0.4em;display:block;">Property 1:</label>
+				<SELECT id="PropertiesComp1" size="1">
+				</SELECT>
+				<label for="PropertiesComp2" style="margin-top:0.4em;display:block;">Property 2:</label>
+				<SELECT id="PropertiesComp2" size="1">
+				</SELECT>
+				<em>Nodes:</em>
+				<p>
+				<label for="c1">1</label> 
+				<input type="checkbox" id="c1">
+				<label for="c2">2</label> 
+				<input type="checkbox" id="c2"> 
+				<label for="c3">3</label> 
+				<input type="checkbox" id="c3"> 
+				<label for="c4">4</label> 
+				<input type="checkbox" id="c4"> 
+				<label for="c5">5</label> 
+				<input type="checkbox" id="c5"> 
+				</p>
+				<p>
+				<label for="c6">6</label> 
+				<input type="checkbox" id="c6"> 
+				<label for="c7">7</label> 
+				<input type="checkbox" id="c7"> 
+				<label for="c8">8</label> 
+				<input type="checkbox" id="c8"> 
+				<label for="c9">9</label> 
+				<input type="checkbox" id="c9"> 
+				<label for="c10">10</label> 
+				<input type="checkbox" id="c10"> 
+				</p>
+				<p>
+				<label for="c11">11</label> 
+				<input type="checkbox" id="c11"> 
+				<label for="c12">12</label> 
+				<input type="checkbox" id="c12"> 
+				<label for="c13">13</label> 
+				<input type="checkbox" id="c13">
+				<label for="c14">14</label> 
+				<input type="checkbox" id="c14"> 
+				<label for="c15">15</label> 
+				<input type="checkbox" id="c15"> 
+				</p>
+			</FORM>
+		</div>
+		<div id="chart">
+		</div>
+	</div>
+	<script type="text/javascript" src="scriptFiles\nodesGraphs.js"></script>
+</body>
+
+</html>
