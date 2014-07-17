@@ -9,8 +9,12 @@
 	<link rel="stylesheet" type="text/css" href="cssFiles/wikiSensing.css" />
 </head>
 
-<body>	
-	<FORM style="display:inline-block;">
+<body>
+	<div id="header">
+		<span id="title">WikiSensing Visualisation Tool</span>
+	</div>
+	
+	<FORM id ="menu">
 		<SELECT id="choice1" size="1">
 		</SELECT>
 		<SELECT id="choice2" size="1">
@@ -22,15 +26,6 @@
 	</FORM>
 	
 	<div id="chart"></div>
-	
-	<div id="progress" style="display:none;">
-		<progress value="0" max="15" id="progBar">
-		<span id="downloadProgress">
-		Retrieving Data ...
-		</span>
-		</progress>
-	</div>
-	
 </body>
 
 <script src="scriptFiles\wikiSensing.js"></script>

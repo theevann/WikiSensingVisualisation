@@ -3,14 +3,14 @@
 		d = document,
 		e = d.documentElement,
 		g = d.getElementsByTagName('body')[0],
-		W = w.innerWidth || e.clientWidth || g.clientWidth,
+		W = e.clientWidth ||w.innerWidth || g.clientWidth,
 		H = w.innerHeight|| e.clientHeight|| g.clientHeight;
 		
 		var width = W,
-		height = H*0.9;
+		height = H*0.8;
 		
-		var graphHeight = parseInt(0.9 * height);
-		var graphWidth = parseInt(0.9*width);
+		var graphHeight = parseInt(0.95* height);
+		var graphWidth = parseInt(0.85*width);
 		
 		d3.selectAll("svg").remove();
 		var svg = d3.select("#chart").append("svg")
@@ -18,7 +18,7 @@
 			.attr("height", height)
 			
 		var gr = svg.append("g")
-			.attr("transform", "translate(" + 50 + "," + 50 + ")")
+			.attr("transform", "translate(" + parseInt((width-graphWidth)/2) + "," + 0 + ")")
 			.attr("class", "graph")
 			.attr("width", graphWidth)
 			.attr("height", graphHeight);
