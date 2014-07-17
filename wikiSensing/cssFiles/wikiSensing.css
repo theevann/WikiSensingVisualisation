@@ -1,0 +1,30 @@
+﻿
+.line{
+  fill: none;
+  stroke-width: 1.5px;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+#header
+{
+	position:relative;
+	text-align: center;
+	font-size: 2em;
+	background-color: #aec3fc;
+	border-radius: 10px;
+	box-shadow: 3px 3px 6px 0 #A9A9A9;;
+	padding: 0.2em 0em;
+}
+
+#menu{
+	margin: 1em;
+	/*position:absolute;
+	left:1em;
+	top:0.1em;*/
+}
