@@ -2,7 +2,7 @@
 <html>
 
 <head>
-	<title>Captors Dashboard</title>
+	<title>Nodes Dashboard</title>
 	<script src="http://d3js.org/d3.v3.min.js">
 	</script>
 	<script src="d3-transform.js"></script>
@@ -150,7 +150,7 @@ progress::-webkit-progress-value {
 <body>
 	
 	<div id="header">
-		<span id="title">Captors</span>
+		<span id="title">Nodes</span>
 		<div id="menu1">
 			<FORM style="display:inline-block;">
 				<SELECT id="Properties" size="1">
@@ -183,7 +183,7 @@ progress::-webkit-progress-value {
 				<label for="PropertiesComp2" style="margin-top:0.4em;display:block;">Property 2:</label>
 				<SELECT id="PropertiesComp2" size="1">
 				</SELECT>
-				<em>Captors:</em>
+				<em>Nodes:</em>
 				<p>
 				<label for="c1">1</label> 
 				<input type="checkbox" id="c1">
@@ -525,7 +525,7 @@ progress::-webkit-progress-value {
 					hideGraphs(index, graph,false);
 				}
 				
-				d3.select("#title").text("Captor " + (parseInt(index)+1));	
+				d3.select("#title").text("Node " + (parseInt(index)+1));	
 			}
 			else
 			{
@@ -559,7 +559,7 @@ progress::-webkit-progress-value {
 					}
 				}
 				
-				d3.select("#title").text("Captors");			
+				d3.select("#title").text("Nodes");			
 				maximise = -1;
 			}
 		};
