@@ -197,7 +197,7 @@
 		
 		var minT = formatValue(d3.min(data, function(c) { return c.sensorRecords[time].prop; }));
 		var maxT = formatValue(d3.max(data, function(c) { return c.sensorRecords[time].prop; }));
-		d3.select("#date").text(data[0].sensorRecords[time].date + " / Min T : " + minT + ", Max T : " + maxT);
+		d3.select("#date").text(data[0].sensorRecords[time].date + " / Min : " + minT + ", Max : " + maxT);
 		
 		var c = new Array();
 		var v = new Array();

@@ -726,17 +726,6 @@ progress::-webkit-progress-value {
 		}
 		// - END FUNCTION DRAW_CAPTOR_GRAPH
 		
-		var findExtent = function(pNm){
-			var ext = d3.extent(data[0].sensorRecords, function(d) { return d.prop; });
-			var extTemp;
-			for (j = 0 ; j < data.length; j++) 
-			{
-				extTemp = d3.extent(data[j].sensorRecords, function(d) { return d.prop; });
-				ext[0] = (extTemp[0] < ext[0])? extTemp[0] : ext[0];
-				ext[1] = (extTemp[1] > ext[1])? extTemp[1] : ext[1];
-			}			
-		};
-		
 		// - FUNCTION DRAW_AXIS
 		var drawAxis = function(){
 						
@@ -751,7 +740,6 @@ progress::-webkit-progress-value {
 			
 			//ICI Effacer les axes précédents
 			d3.selectAll(".y").remove();
-			
 			
 			y1Axis = d3.svg.axis()
 			.scale(y1)
