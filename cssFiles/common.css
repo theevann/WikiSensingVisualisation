@@ -39,9 +39,12 @@ li {
 a{
 	text-decoration: none;
 	color: black;
+	transition: color 0.5s;
 }
 
 a:hover{
+	transition-property: color;
+	transition-duration: 0.5s;
 	text-decoration: none;
 	color: white;
 }
