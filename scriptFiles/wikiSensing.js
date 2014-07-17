@@ -6,7 +6,15 @@
 	var form3_1 = document.getElementById('choice3_1');
 	var form3_2 = document.getElementById('choice3_2');
 	var parseDate = d3.time.format("%Y-%m-%dT%H:%M:%SZ").parse;
-
+	var parseDate1 = d3.time.format("%Y-%m-%d").parse;
+	var parseTime = d3.time.format("%H:%M:%S").parse;
+	var parseTime2 = d3.time.format("%H:%M").parse;
+	var parser = new Array();
+	
+	parser[0] = parseDate;
+	parser[1] = parseDate1;
+	parser[2] = parseTime;
+	parser[3] = parseTime2;
 
 	var loadForm1 = function(){
 		d3.json("http://wikisensing.org/WikiSensingServiceAPI/", function(error, json) {
@@ -75,24 +83,24 @@
 		choice3.append("option")
 			   .text("None");
 		data.sensorRecords[0].sensorObject.forEach(function(d) {
-			if(d.fieldName != "User")
+			if(!isNaN(parseFloat(d.value)))
 				choice3.append("option")
 				   .text(d.fieldName);
 		});
 	}
 	
-	var createProperty1 = function(id){
+	var createProperty1 = function(id,p){
 		if(id != 0){
 			data.sensorRecords.forEach(function(d) {
-					d.prop1 = parseFloat(d.sensorObject[id].value);
+					d.prop1 = p(d.sensorObject[id].value);
 			});
 		}
 	}
 	
-	var createProperty2 = function(id){
+	var createProperty2 = function(id,p){
 		if(id != 0){
 			data.sensorRecords.forEach(function(d) {
-					d.prop2 = parseFloat(d.sensorObject[id].value);
+					d.prop2 = p(d.sensorObject[id].value);
 			});
 		}
 	}
@@ -102,29 +110,61 @@
 				if(d.fieldName == "TimeStamp")
 					idTS = i;
 		});
-		console.log("TimeStamp : " + idTS);
+	}
+	
+	var findIndexOf = function(id){
+		var name = form3_1.options[id].value;
+		var idT = 0;
+		data.sensorRecords[0].sensorObject.forEach(function(d,i) {
+				if(d.fieldName == name)
+					idT = i;
+		});
+		return idT;
+	}
+	
+	var findParser = function(id){
+		var p = parseFloat;
+		var value = data.sensorRecords[0].sensorObject[id].value;
+		parser.forEach(function(d,i) {
+				if(d(value) != null)
+					p = parser[i];
+		});
+		return p;
 	}
 	
 	var initialize = function(){
 		//Listen to form 1
 		form1.addEventListener('change', function() {
-			loadForm2();	
+			loadForm2();
+			d3.selectAll("#choice2 option").remove();
+			d3.selectAll("#choice3_1 option").remove();
+			d3.selectAll("#choice3_2 option").remove();
 		}, true);
 		
 		//Listen to form 2
 		form2.addEventListener('change', function() {
-			loadData();	
+			loadData();
+			d3.selectAll("#choice3_1 option").remove();
+			d3.selectAll("#choice3_2 option").remove();
 		}, true);
 		
 		//Listen to forms 3
 		form3_1.addEventListener('change', function() {
-			createProperty1(form3_1.selectedIndex);
-			createGraph(form3_1.selectedIndex, form3_2.selectedIndex);
+			var id1 = findIndexOf(form3_1.selectedIndex)
+			var id2 = findIndexOf(form3_2.selectedIndex)
+			var p1 = findParser(id1);
+			var p2 = findParser(id2);
+			createProperty1(id1, p1);
+			createGraph(id1, id2, (p1 != parseFloat), (p2 != parseFloat));
 		}, true);
 		
 		form3_2.addEventListener('change', function() {
-			createProperty2(form3_2.selectedIndex);
-			createGraph(form3_1.selectedIndex, form3_2.selectedIndex);	
+			var id1 = findIndexOf(form3_1.selectedIndex)
+			var id2 = findIndexOf(form3_2.selectedIndex)
+			var p1 = findParser(id1);
+			var p2 = findParser(id2);
+			createProperty2(id2,p2);
+			createGraph(id1, id2, (p1 != parseFloat), (p2 != parseFloat));
 		}, true);
 		
 		//Initial loading of form 1

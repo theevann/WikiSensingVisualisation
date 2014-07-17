@@ -1,4 +1,4 @@
-﻿	var createGraph = function(p1, p2){
+﻿	var createGraph = function(p1, p2, v1, v2){
 		var w = window,
 		d = document,
 		e = d.documentElement,
@@ -6,11 +6,11 @@
 		W = w.innerWidth || e.clientWidth || g.clientWidth,
 		H = w.innerHeight|| e.clientHeight|| g.clientHeight;
 		
-		var width = W*0.95,
+		var width = W,
 		height = H*0.9;
 		
 		var graphHeight = parseInt(0.9 * height);
-		var graphWidth = parseInt(0.95*width);
+		var graphWidth = parseInt(0.9*width);
 		
 		d3.selectAll("svg").remove();
 		var svg = d3.select("#chart").append("svg")
@@ -43,8 +43,12 @@
 		}
 		
 		if(p1 != 0){
-			y1 = d3.scale.linear()
-				.range([graphHeight, 0]);
+			if(v1)
+				y1 = d3.time.scale();
+			else
+				y1 = d3.scale.linear();
+			
+			y1.range([graphHeight, 0]);
 
 			y1.domain([
 				d3.min(data.sensorRecords, function(d) { return d.prop1; }),
@@ -67,8 +71,12 @@
 		}
 		
 		if(p2 != 0){
-			y2 = d3.scale.linear()
-				.range([graphHeight, 0]);
+			if(v2)
+				y2 = d3.time.scale();
+			else
+				y2 = d3.scale.linear();
+			
+			y2.range([graphHeight, 0]);
 			
 			y2.domain([
 				d3.min(data.sensorRecords, function(d) { return d.prop2; }),
@@ -85,7 +93,7 @@
 			  .attr("transform", "translate(" + graphWidth + ", 0)")
 			  .append("text")
 			  .attr("transform", "rotate(-90)")
-			  .attr("y", 6)
+			  .attr("y", -20)
 			  .attr("dy", ".71em")
 			  .style("text-anchor", "end")
 			  .text(data.sensorRecords[0].sensorObject[p2].fieldName);		
