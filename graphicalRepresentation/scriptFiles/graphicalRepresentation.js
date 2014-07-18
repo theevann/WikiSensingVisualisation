@@ -30,7 +30,6 @@
 			bar.attr("value",file); 
 			if(file == 15){
 				bar.style("display","none");
-				d3.select("#launch").attr("disabled",null);
 				initialize();
 			}
 			else if(file < 15)
@@ -41,8 +40,7 @@
 	
 	//End Loading Data
 	
-	var min, max, color, svg, active, numRepresentation;
-
+	var min, max, color, svg, active, numRepresentation, frame, lastEnd, lastPas;
 	
 	//Function creating scale and axis
 	
@@ -86,14 +84,23 @@
 			.scale(d3.scale.linear().domain([min,max]).range([heightScale,0]))
 			.orient("left");
 		
-		svg.append("g")
+		var scale = svg.append("g")
 		  .attr("id", "scale")
 		  .attr("transform", "translate(" + parseInt(10+0.95*width) + ",10)")
 		  .call(scaleAxis)
-		  .append("rect")
+		
+		scale.append("rect")
 			.attr("width", parseInt(0.05*width))
 			.attr("height", heightScale)
-			.attr("fill", "url(#scale-gradient)");
+			.attr("fill", "url(#scale-gradient)");  
+		
+		scale.append("text")
+			.attr("transform", "rotate(0)")
+			.attr("y", -10)
+			.attr("dy", ".71em")
+			.style("text-anchor", "start")
+			.style("text-align","center")
+			.text(data[0].sensorRecords[0].propName);		
 	}
 		
 	
@@ -102,22 +109,36 @@
 	var initialize = function(){
 		
 		numRepresentation = 0;
+		frame = 0;
+		repEnd = 1000;
+		repPas = 10;
 		active = false;
 		
-		//Listening Button
+		//Listening Launch/Pause Button
 	
 		var launchButton = document.getElementById('launch');
 		launchButton.addEventListener('click', function() {
 			if(active == false){
-				launchButton.innerHTML = "Stop";
-				createTimeRepresentation(0,1000,10,100);
+				launchButton.innerHTML = "Pause";
+				createTimeRepresentation(frame,repEnd,repPas,100);
 			}
 			else{
 				active = false;
-				launchButton.innerHTML = "Launch";
+				launchButton.innerHTML = "Start";
 			}
 		 }, true);
-		
+		 d3.select("#launch").attr("disabled",null);
+		 
+		 //Listening Reset Button
+	
+		var resetButton = document.getElementById('reset');
+		resetButton.addEventListener('click', function() {
+				launchButton.innerHTML = "Launch";
+				active = false;
+				frame = 0;
+		 }, true);
+		d3.select("#reset").attr("disabled",null);
+
 		//Create variable for more practical use
 	
 		data.forEach(function(c,i) {
@@ -126,6 +147,7 @@
 				d.x = distance.x*parseInt(i%5);
 				d.y = distance.y*parseInt(i/5);
 				d.prop = parseFloat(d.sensorObject[10].value);
+				d.propName = d.sensorObject[10].fieldName;
 			});
 			c.sensorRecords.sort(function(a, b) {
 				return a.date - b.date;
@@ -152,7 +174,8 @@
 		list.addEventListener('change', function() {
 			data.forEach(function(c,i) {
 				c.sensorRecords.forEach(function(d) {
-					d.prop = parseFloat(d.sensorObject[(list.selectedIndex+2)].value);
+					d.prop = parseFloat(d.sensorObject[(list.selectedIndex+2)].value); // +2 because two fields are not available for display
+					d.propName = d.sensorObject[(list.selectedIndex+2)].fieldName; // +2 because two fields are not available for display
 				});
 			});
 			initColorAndScale();
@@ -266,10 +289,13 @@
 	// Auxiliary function to stop time representation
 	
 	var triggeredByTimer = function(time, num, end){
-		if(numRepresentation == num && active == true)
+		if(numRepresentation == num && active == true){
+			frame = time;
 			createRepresentation(time);
-		if(end-1 == time)
+		}
+		if(end-1 == time){
 			active = false;
+		}
 	}
 	
 	//Function to create an Animation, n.b.: here a closure is needed to keep the 
