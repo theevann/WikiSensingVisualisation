@@ -18,8 +18,8 @@
 		
 	//Loading Data
 	
-	var data = new Array(); // a global
-	var file = 0;
+	var data = new Array(); // To contain data
+	var file = 0; // To know which file is being loaded
 	var bar = d3.select("#progBar");
 	
 	var getFile = function(){
@@ -204,6 +204,8 @@
 			.range(["blue", "red"]);
 			//*/
 		
+		// if time - startTime
+		
 		d3.selectAll(".group").remove();	
 		var gr = svg.append("g").attr("index",time).attr("class","group");
 		
@@ -298,7 +300,7 @@
 		}
 	}
 	
-	//Function to create an Animation, n.b.: here a closure is needed to keep the 
+	//Function to create an Animation, n.b.: here a closure is needed to keep the value of i
 	
 	var createTimeRepresentation = function(start,end, pas, timePas){
 		numRepresentation++;

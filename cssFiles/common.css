@@ -18,6 +18,12 @@
 	margin-bottom: 0.5em;
 }
 
+#back{
+	position:absolute;
+	right:1em;
+	top:0.6em;
+}
+
 ol {
 	width:30%;
 	margin-right: auto;
