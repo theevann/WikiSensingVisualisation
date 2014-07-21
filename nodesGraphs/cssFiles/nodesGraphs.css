@@ -61,7 +61,7 @@
 }
 
 em{
-	display:block;
+	display:inline-block;
 	font-weight:bold;
 	font-style:normal;
 	padding-top:1em;
