@@ -5,12 +5,14 @@
 	
 	var getFile = function(){
 		d3.json("http://wikisensing.org/WikiSensingServiceAPI/DCESensorDeployment2f7M76vkKdRlvm7vVWg/Node_" + (file+1), function(error, json) {
-			if (error) return console.warn(error);
+			if (error){ d3.select("#downloadProgress").text("Impossible to load data");return console.warn(error);}
 			data[file] = json;
 			file = file + 1;
-			bar.attr("value",file); 
+			//Display loading of data
+			bar.attr("value",file);
+			d3.select("downloadProgress").text("Retrieving Data ... " + file + "/15");
 			if(file == 15){
-				bar.style("display","none");
+				d3.select("#progress").style("display","none");
 				createOption();
 				createGraphs(actualProp);
 			}
@@ -69,7 +71,7 @@
 	var svg;
 	var margin = {outter: 100, inner : 50},
 		width = W,
-		height = H - 2*parseInt(window.getComputedStyle(document.querySelector('body')).marginTop) - parseInt(window.getComputedStyle(document.getElementById('header')).marginTop) - parseInt(window.getComputedStyle(document.getElementById('header')).marginBottom) - document.getElementById('header').getBoundingClientRect().height;
+		height = (H - 2*parseInt(window.getComputedStyle(document.querySelector('body')).marginTop) - parseInt(window.getComputedStyle(document.getElementById('header')).marginTop) - parseInt(window.getComputedStyle(document.getElementById('header')).marginBottom) - document.getElementById('header').getBoundingClientRect().height);
 		
 	
 	//FROM HERE -- SPECIFIC TO MULTIPLE CHARTS TAB
