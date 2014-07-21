@@ -6,16 +6,16 @@
 		H = w.innerHeight|| e.clientHeight|| g.clientHeight;
 		
 	var width = W*0.95,
-		height = H*0.9;
+		height = H*0.85;
 		
 	var distance = {x : 4.5, y : 5};
-	var dimension = {x : parseInt(0.9*width/4), y : parseInt(0.9*height/2)};
+	var dimension = {x : parseInt(0.9*width/4), y : parseInt(0.95*height/2)};
 
 	var parseDate = d3.time.format("%Y-%m-%dT%H:%M:%SZ").parse;
 	var formatValue = d3.format(",.2f");
 	var formatDate = function(d) { return formatValue(d) ; };
 	var taillePas = 5; // height of the gradient line => the bigger it is, the less precise it will be ((has to be integer > 0)
-		
+	
 	//Loading Data
 	
 	var data = new Array(); // To contain data
@@ -24,12 +24,14 @@
 	
 	var getFile = function(){
 		d3.json("http://wikisensing.org/WikiSensingServiceAPI/DCESensorDeployment2f7M76vkKdRlvm7vVWg/Node_" + (file+1), function(error, json) {
-			if (error) return console.warn(error);
+			if (error){ d3.select("#downloadProgress").text("Impossible to load data");return console.warn(error);}
 			data[file] = json;
 			file = file + 1;
-			bar.attr("value",file); 
+			//Display loading of data
+			bar.attr("value",file);
+			d3.select("downloadProgress").text("Retrieving Data ... " + file + "/15");
 			if(file == 15){
-				bar.style("display","none");
+				d3.select("#progress").style("display","none");
 				initialize();
 			}
 			else if(file < 15)
@@ -40,16 +42,75 @@
 	
 	//End Loading Data
 	
-	var min, max, color, svg, active, numRepresentation, frame, lastEnd, lastPas;
+	var min, max, color, svg, active, numRepresentation, frame, dataEnd, repEnd, repPas, dataStart, repStart, scalingPeriod;
+	
+	//Find extent over specific period of time around a given time
+	
+	var findExtent = function(frameTime){
+		var extentTime = [dataStart, dataEnd];
+		var extentValue = new Array();
+		
+		if(dataEnd - dataStart <= scalingPeriod){
+			extentValue[0] = d3.min(data, function(c) { return d3.min(c.sensorRecords, function(d) { return d.prop; }); });
+			extentValue[1] = d3.max(data, function(c) { return d3.max(c.sensorRecords, function(d) { return d.prop; }); });
+			return extentValue;
+		}
+		else if((frameTime - dataStart) < parseInt(scalingPeriod/2)){
+			extentTime[1] = dataStart + scalingPeriod;
+		}
+		else if((dataEnd - frameTime) < parseInt(scalingPeriod/2)){
+			extentTime[0] = dataEnd - scalingPeriod;
+		}
+		else{
+			 extentTime[0] = frameTime-parseInt(scalingPeriod/2);
+			 extentTime[1] = frameTime+parseInt(scalingPeriod/2);
+		}
+		
+		extentValue[0] = d3.min(data, function(d) {
+			var min = d.sensorRecords[extentTime[0]].prop;
+			for(var j = extentTime[0]+1 ; j < extentTime[1]; j++){
+				min = (d.sensorRecords[j].prop < min)? d.sensorRecords[j].prop : min;
+			}
+			return min;
+		});
+		
+		extentValue[1] = d3.max(data, function(d) {
+			var max = d.sensorRecords[extentTime[0]].prop;
+			for(var j = extentTime[0]+1 ; j < extentTime[1]; j++){
+				max = (d.sensorRecords[j].prop > max)? d.sensorRecords[j].prop : max;
+			}
+			return max;
+		});
+		
+		return extentValue;	
+	}
+	
 	
 	//Function creating scale and axis
 	
 	var initColorAndScale = function(){
-	
+		
+		var extent = new Array();
+		
+		//Find the extent of values for the scale depending on the chosen scaling period
+		if(scalingPeriod == 0){ //Case if scaling period = whole time
+			extent[0] = d3.min(data, function(c) { return d3.min(c.sensorRecords, function(d) { return d.prop; }); });
+			extent[1] = d3.max(data, function(c) { return d3.max(c.sensorRecords, function(d) { return d.prop; }); });
+		}
+		else if(scalingPeriod == 1){ //Case if scaling period = one frame
+			extent[0] = d3.min(data, function(d) { return d.sensorRecords[frame].prop; });
+			extent[1] = d3.max(data, function(d) { return d.sensorRecords[frame].prop; });
+		}
+		else
+			extent = findExtent(frame);
+		
+		//If nothing has changed, we do not redraw
+		if(min == extent[0] && max == extent[1])
+			return;
+		
 		//Define range and color range
-	
-		min = d3.min(data, function(c) { return d3.min(c.sensorRecords, function(d) { return d.prop; }); });
-		max = d3.max(data, function(c) { return d3.max(c.sensorRecords, function(d) { return d.prop; }); });
+		min = extent[0];
+		max = extent[1];
 		color = d3.scale.linear()
 			.domain([min,min+(max-min)/4,(min+max)/2,min+3*(max-min)/4,max])
 			.range(["blue", "#27f600", "yellow","orange","red"]);
@@ -108,19 +169,26 @@
 	
 	var initialize = function(){
 		
-		numRepresentation = 0;
-		frame = 0;
+		dataStart = 0;
+		dataEnd = data[0].sensorRecords.length;
+		
+		repStart = 0;
 		repEnd = 1000;
 		repPas = 10;
+		scalingPeriod = 0;
+		speed = 500;
+		
+		frame = 0;
+		numRepresentation = 0;
 		active = false;
 		
-		//Listening Launch/Pause Button
+		//Listen to  Launch/Pause Button
 	
 		var launchButton = document.getElementById('launch');
 		launchButton.addEventListener('click', function() {
 			if(active == false){
 				launchButton.innerHTML = "Pause";
-				createTimeRepresentation(frame,repEnd,repPas,100);
+				createTimeRepresentation(frame,repEnd,repPas,speed);
 			}
 			else{
 				active = false;
@@ -129,16 +197,23 @@
 		 }, true);
 		 d3.select("#launch").attr("disabled",null);
 		 
-		 //Listening Reset Button
+		 //Listen to  Reset Button
 	
 		var resetButton = document.getElementById('reset');
 		resetButton.addEventListener('click', function() {
 				launchButton.innerHTML = "Launch";
 				active = false;
-				frame = 0;
+				frame = repStart;
 		 }, true);
 		d3.select("#reset").attr("disabled",null);
-
+		
+		//Listen to speed input
+		
+		var speedInput = document.getElementById('speed');
+		speedInput.addEventListener('change', function() {
+			speed = (parseInt(speedInput.value) > 0)? speedInput.value : speed;
+		 }, true);
+		
 		//Create variable for more practical use
 	
 		data.forEach(function(c,i) {
@@ -155,11 +230,19 @@
 			
 		});
 		
-		//Create options in the form
+		//Listen to the time scale form
+		
+		var scalingList= document.getElementById('scalingPeriod');
+		scalingList.addEventListener('change', function() {
+			scalingPeriod = scalingList.options[scalingList.selectedIndex].value;
+			initColorAndScale();
+		}, true);
+		
+		//Create options in the property form
 		
 		data[0].sensorRecords[0].sensorObject.forEach(function(d) {
 			if(d.fieldName != "User" && d.fieldName != "Created")
-				d3.selectAll("body form select")
+				d3.select("#Properties")
 				.append("option")
 				.text(d.fieldName);
 			});
@@ -168,14 +251,14 @@
 				
 		d3.select("#Properties option:nth-child("+(10-1)+")").attr("selected","selected");
 
-		//Listen to the form
+		//Listen to the property form
 		
-		var list = document.getElementById('Properties');
-		list.addEventListener('change', function() {
+		var propertyList = document.getElementById('Properties');
+		propertyList.addEventListener('change', function() {
 			data.forEach(function(c,i) {
 				c.sensorRecords.forEach(function(d) {
-					d.prop = parseFloat(d.sensorObject[(list.selectedIndex+2)].value); // +2 because two fields are not available for display
-					d.propName = d.sensorObject[(list.selectedIndex+2)].fieldName; // +2 because two fields are not available for display
+					d.prop = parseFloat(d.sensorObject[(propertyList.selectedIndex+2)].value); // +2 because two fields are not available for display
+					d.propName = d.sensorObject[(propertyList.selectedIndex+2)].fieldName; // +2 because two fields are not available for display
 				});
 			});
 			initColorAndScale();
@@ -195,16 +278,9 @@
 	//Function for creating a color map at the time index given (between 1 and 1000)
 	
 	var createRepresentation  = function(time){
-		/*
-		var color = d3.scale.linear()
-		.domain([
-			d3.min(data, function(c) { return c.sensorRecords[time].prop; }),
-			d3.max(data, function(c) { return c.sensorRecords[time].prop; })
-			])
-			.range(["blue", "red"]);
-			//*/
 		
-		// if time - startTime
+		//Redraw Scale depending on the scaling period
+		initColorAndScale();
 		
 		d3.selectAll(".group").remove();	
 		var gr = svg.append("g").attr("index",time).attr("class","group");
@@ -312,6 +388,6 @@
 					(function(f,g,h){
 						return function(){ triggeredByTimer(f,g,h);};
 					})(i,numRepresentation,end)
-					,timePas*(i-start));	
+					,timePas*(i-start)/pas);	
 		}
 	}

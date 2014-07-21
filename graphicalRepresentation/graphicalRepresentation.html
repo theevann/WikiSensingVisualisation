@@ -19,18 +19,29 @@
 	<button id = "reset" disabled='disabled'  style="width:60px">Reset</button>
 	
 	<FORM style="display:inline-block;">
+		<label for="Properties">Property : </label> 
 		<SELECT id="Properties" size="1">
 		</SELECT>
+		<label for="scalingPeriod">Scaling period :</label> 
+		<SELECT id="scalingPeriod" size="1">
+		<option value = "0">All time</option>
+		<option value = "1">Each frame</option>
+		<option value = "30">30 min</option>
+		<option value = "60">1 hour</option>
+		<option value = "120">2 hours</option>
+		<option value = "300">5 hours</option>
+		</SELECT>
+		<label for="speed">Speed :</label> 
+		<input type="number" step="1" value="500" min="1" max="10000" id="speed"> <!-- ms / frame -->
 	</FORM>
 	
 	<p id="date" style="display:inline-block;"></p>
+	
 	<div id="progress">
-		<progress value="0" max="15" id="progBar">
-		<span id="downloadProgress">
-		Retrieving Data ...
-		</span>
-		</progress>
+		<progress value="0" max="15" id="progBar"></progress>
+		<span id="downloadProgress">Retrieving Data ... 0/15</span>
 	</div>
+	
 </body>
 <script src="scriptFiles\graphicalRepresentation.js"></script>
 </html>
