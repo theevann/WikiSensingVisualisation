@@ -1,5 +1,5 @@
 ﻿	
-	var dataForm1, dataForm2, dataForm3, data;
+	var dataForm1, dataForm2, dataForm3, data, numMes;
 	var idTS;
 	var form1 = document.getElementById('choice1');
 	var form2 = document.getElementById('choice2');
@@ -55,7 +55,7 @@
 	}
 		
 	var loadData = function(){
-		d3.json("http://wikisensing.org/WikiSensingServiceAPI/" + form1.options[form1.selectedIndex].value + "/" + form2.options[form2.selectedIndex].value, function(error, json) {
+		d3.json("http://wikisensing.org/WikiSensingServiceAPI/" + form1.options[form1.selectedIndex].value + "/" + form2.options[form2.selectedIndex].value + "/" + numMes , function(error, json) {
 			if (error) return console.warn(error);
 			data = json;
 			console.log (data);
@@ -133,6 +133,8 @@
 	}
 	
 	var initialize = function(){
+		numMes = 1000;
+		
 		//Listen to form 1
 		form1.addEventListener('change', function() {
 			loadForm2();
@@ -167,6 +169,15 @@
 			var p2 = findParser(id2);
 			createProperty2(id2,p2);
 			createGraph(id1, id2, (p1 != parseFloat), (p2 != parseFloat));
+		}, true);
+		
+		 
+		//Listen to number of measurements input
+		
+		var mesInput = document.getElementById('measurements');
+		mesInput.addEventListener('change', function() {
+		    numMes = (parseInt(mesInput.value) >= 100)? mesInput.value : numMes;
+			loadData();
 		}, true);
 		
 		//Initial loading of form 1
