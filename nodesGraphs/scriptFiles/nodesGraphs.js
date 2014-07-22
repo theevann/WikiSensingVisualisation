@@ -82,8 +82,9 @@
 	            }
 	        }, true);
 
-	    } // End initialise
-
+	    } // End initialise	
+		
+		initialise();
 
 	var w = window,
 	    d = document,

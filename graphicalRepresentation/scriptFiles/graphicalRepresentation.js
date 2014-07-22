@@ -213,6 +213,13 @@
 		speedInput.addEventListener('change', function() {
 			speed = (parseInt(speedInput.value) > 0)? speedInput.value : speed;
 		 }, true);
+		 
+		//Listen to number of measurements input
+		
+		var mesInput = document.getElementById('measurements');
+		mesInput.addEventListener('change', function() {
+			numMes = (parseInt(mesInput.value) >= 100)? mesInput.value : numMes;
+		 }, true);
 		
 		//Create variable for more practical use
 	
