@@ -29,7 +29,7 @@
 			file = file + 1;
 			//Display loading of data
 			bar.attr("value",file);
-			d3.select("downloadProgress").text("Retrieving Data ... " + file + "/15");
+			d3.select("#downloadProgress").text("Retrieving Data ... " + file + "/15");
 			if(file == 15){
 				d3.select("#progress").style("display","none");
 				initialize();
