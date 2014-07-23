@@ -1,8 +1,34 @@
-﻿var gr, p1=10, p2=14; // Properties initially displayed
+﻿var gr, p1, p2; // Properties initially displayed
 
+var initTab2 = function(){
+		p1=10;
+		p2=14;
+		
+		
+		var selectButton = document.getElementById('selectAll'),
+			deselectButton = document.getElementById('deselectAll');
+		
+		selectButton.addEventListener('click', function () {
+			for (var j = 0; j < data.length; j++) {
+				var checkB = document.getElementById('c' + (j + 1));
+				checkB.checked = true;
+				captorsUpdate.apply(checkB, []);
+			}
+		}, true);
+
+		deselectButton.addEventListener('click', function () {
+			for (var j = 0; j < data.length; j++) {
+				var checkB = document.getElementById('c' + (j + 1));
+				checkB.checked = false;
+				captorsUpdate.apply(checkB, []);
+
+			}
+		}, true);
+}
+		
 var createComparisonGraph = function(){
-	width = 0.99*(e.clientWidth - 2*parseInt(window.getComputedStyle(document.querySelector('body')).marginRight) - parseInt(window.getComputedStyle(document.getElementById('menuComparison')).marginLeft) - parseInt(window.getComputedStyle(document.getElementById('menuComparison')).marginRight) - document.getElementById('menuComparison').getBoundingClientRect().width);
-	height = H*0.9;
+	var width = 0.99*(e.clientWidth - 2*parseInt(window.getComputedStyle(document.querySelector('body')).marginRight) - parseInt(window.getComputedStyle(document.getElementById('menuComparison')).marginLeft) - parseInt(window.getComputedStyle(document.getElementById('menuComparison')).marginRight) - document.getElementById('menuComparison').getBoundingClientRect().width);
+	var height = H*0.9;
 	
 	var oneGraphHeight = 0.9*height;
 	var oneGraphWidth = 0.9*width;
@@ -75,7 +101,7 @@ var createComparisonGraph = function(){
 //--------
 	
 	// - FUNCTION CAPTORS_UPDATE
-	var captorsUpdate = function(){
+	captorsUpdate = function(){
 		var index = parseInt(/[0-9]+/.exec(this.id)[0]);
 			if (this.checked) {
 				data[index-1].sensorRecords.forEach(function(d) {
@@ -100,8 +126,17 @@ var createComparisonGraph = function(){
 	
 	checkboxs.on("click", captorsUpdate);	
 	
+	drawAllGraphsForProp = function(pNm){	
+		for( j = 0 ; j < data.length ; j++){
+			var checkB = document.getElementById('c' + (j+1));
+			if(checkB.checked)
+				drawCaptorGraph(j, pNm);
+		}
+	}
+	
+	
 	// - FUNCTION DRAW_CAPTOR_GRAPH
-	var drawCaptorGraph = function(index, pNm, p){
+	var drawCaptorGraph = function(index, pNm){
 		
 		var myPath;
 		d3.selectAll(".lineComp").each( function(){
@@ -110,7 +145,6 @@ var createComparisonGraph = function(){
 		});
 		
 		if(typeof myPath != "undefined"){
-			console.log("graph existing");
 			myPath.datum(data[index].sensorRecords)
 				.attr("d", line[pNm-1]);
 		}
@@ -121,7 +155,7 @@ var createComparisonGraph = function(){
 			.attr("d", line[pNm-1])
 			.attr("captor",index)
 			.attr("prop",pNm)
-			.style("stroke", function(d) { return colors(index); });
+			.style("stroke", function(d) { if(pNm == 1) {return colors(index);} else {return d3.rgb(colors(index)).brighter(0.5);}  });
 		}
 		//*/  
 	}
@@ -185,11 +219,6 @@ var createComparisonGraph = function(){
 			});
 		}
 		drawAxis(p1,p2);
-		for( j = 0 ; j < data.length ; j++){
-			var checkB = document.getElementById('c' + (j+1));
-			if(checkB.checked)
-				drawCaptorGraph(j, 1, p1);
-		}		
 	}
 	
 	listProp1.on("change", propertyUpdateP1);	
@@ -206,11 +235,7 @@ var createComparisonGraph = function(){
 			});
 		}
 		drawAxis(p1,p2);
-		for( j = 0 ; j < data.length ; j++){
-			var checkB = document.getElementById('c' + (j+1));
-			if(checkB.checked)
-				drawCaptorGraph(j, 2, p2);
-		}		
+		drawAllGraphsForProp(2);
 	}
 	
 	listProp2.on("change", propertyUpdateP2);	

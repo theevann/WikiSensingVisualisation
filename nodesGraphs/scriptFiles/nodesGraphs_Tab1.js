@@ -1,12 +1,14 @@
 ﻿var maximise = -1; // To remember which graph was maximised
-	
-var o1 = d3.scale.ordinal().domain([1,2,3,4,5]).rangeBands([0, width],0.15,0.1);
-var o2 = d3.scale.ordinal().domain([1,2,3]).rangeBands([0, height],0.1,0.05)
-			
-			
-var	graphWidth = o1.rangeBand(),
-	graphHeight = o2.rangeBand();
+var o1, o2;
+var	graphWidth, graphHeight;
 
+var initTab1 = function(){
+	o1 = d3.scale.ordinal().domain([1,2,3,4,5]).rangeBands([0, width],0.15,0.1);
+	o2 = d3.scale.ordinal().domain([1,2,3]).rangeBands([0, height],0.1,0.05)
+	graphWidth = o1.rangeBand();
+	graphHeight = o2.rangeBand();
+}
+	
 var hideGraphs = (function(index, graph, anim) {
 	var center = [width/2,height/2];
 	var transfo;
@@ -56,9 +58,6 @@ var hideGraphs = (function(index, graph, anim) {
 });
 
 var createGraphs = function(numProp) {
-	width = W;
-	height = H-document.getElementById('header').offsetHeight;
-
 	svg = d3.select("#charts").append("svg")
 		.attr("width", width)
 		.attr("height", height);
@@ -84,7 +83,7 @@ var createGraphs = function(numProp) {
 	y = d3.scale.linear()
 		.range([graphHeight, 0]);
 	
-	for (j = 0; j < data.length; j++) 
+	for (var j = 0; j < data.length; j++) 
 	{ 	
 		data[j].sensorRecords.forEach(function(d) {
 			d.date = parseDate(d.sensorObject[1].value);
@@ -102,7 +101,7 @@ var createGraphs = function(numProp) {
 		d3.max(data, function(d) { return d3.max(d.sensorRecords, function(s) { return s.temperature; }); })
 	]);
 	
-	for (j = 0; j < data.length; j++) 
+	for (var j = 0; j < data.length; j++) 
 	{ 
 	
 	x[j] = d3.time.scale()
