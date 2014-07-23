@@ -15,34 +15,37 @@
 	var formatValue = d3.format(",.2f");
 	var formatDate = function(d) { return formatValue(d) ; };
 	var taillePas = 5; // height of the gradient line => the bigger it is, the less precise it will be ((has to be integer > 0)
+	var numMes = 1000;
 	
 	//Loading Data
 	
 	var data = new Array(); // To contain data
-	var file = 0; // To know which file is being loaded
 	var bar = d3.select("#progBar");
 	
-	var getFile = function(){
-		d3.json("http://wikisensing.org/WikiSensingServiceAPI/DCESensorDeployment2f7M76vkKdRlvm7vVWg/Node_" + (file+1), function(error, json) {
+	var getFile = function(file, firstTime){
+		d3.json("http://wikisensing.org/WikiSensingServiceAPI/DCESensorDeployment2f7M76vkKdRlvm7vVWg/Node_" + (file+1) + "/" + numMes, function(error, json) {
 			if (error){ d3.select("#downloadProgress").text("Impossible to load data");return console.warn(error);}
 			data[file] = json;
-			file = file + 1;
 			//Display loading of data
 			bar.attr("value",file);
 			d3.select("#downloadProgress").text("Retrieving Data ... " + file + "/15");
-			if(file == 15){
+			if(file == 14){
 				d3.select("#progress").style("display","none");
 				initialize();
+				if(firstTime)
+					initializeListeners();
 			}
-			else if(file < 15)
-				getFile();
+			else if(file < 14)
+				getFile(file + 1, firstTime);
 		});
 	}
-	getFile();
+	
+	getFile(0, true);
 	
 	//End Loading Data
+	//----------------------
 	
-	var min, max, color, svg, active, numRepresentation, frame, dataEnd, repEnd, repPas, dataStart, repStart, scalingPeriod;
+	var min, max, color, svg, active, numRepresentation = 0, frame, dataEnd, repEnd, repPas, dataStart, repStart, scalingPeriod;
 	
 	//Find extent over specific period of time around a given time
 	
@@ -104,8 +107,8 @@
 		else
 			extent = findExtent(frame);
 		
-		//If nothing has changed, we do not redraw
-		if(min == extent[0] && max == extent[1])
+		//If nothing has changed and it's not the beggining, we do not redraw
+		if(min == extent[0] && max == extent[1] && frame != repStart)
 			return;
 		
 		//Define range and color range
@@ -168,22 +171,52 @@
 	// Initializing ...
 	
 	var initialize = function(){
-		
 		dataStart = 0;
 		dataEnd = data[0].sensorRecords.length;
 		
 		repStart = 0;
-		repEnd = 1000;
-		repPas = 10;
-		scalingPeriod = 0;
-		speed = 500;
+		repEnd = data[0].sensorRecords.length;
+		repPas = parseInt(document.getElementById('step').value);
+		scalingPeriod = parseInt(document.getElementById('scalingPeriod').value);
+		speed = parseInt(document.getElementById('speed').value);
+		numMes = parseInt(document.getElementById('measurements').value);
 		
-		frame = 0;
-		numRepresentation = 0;
+		frame = repStart;
 		active = false;
 		
-		//Listen to  Launch/Pause Button
+		//Create variable for more practical use
+		var propertyList = document.getElementById("Properties");
+		var computeData = function(){
+			data.forEach(function(c,i) {
+				c.sensorRecords.forEach(function(d) {
+					d.date = parseDate(d.sensorObject[1].value);
+					d.x = distance.x*parseInt(i%5);
+					d.y = distance.y*parseInt(i/5);
+					d.prop = parseFloat(d.sensorObject[((propertyList.selectedIndex+1) || 9)+1].value); // If nothing selected, selectedIndex = -1 => we use it to take the selected Index only if it's not -1
+					d.propName = d.sensorObject[((propertyList.selectedIndex+1) || 9)+1].fieldName; // Idem
+				});
+				c.sensorRecords.sort(function(a, b) {
+					return a.date - b.date;
+				});
+			});
+		};
+		computeData();
+		
+		//Create SVG
+		d3.selectAll("svg").remove();
+		svg = d3.select("body").append("svg")
+				.attr("width", width)
+				.attr("height", height);
+					
+		//Define range, color range and and create scale
+		
+		initColorAndScale();
+	}
+		
+	var initializeListeners = function(){
 	
+		//Listen to  Launch/Pause Button
+
 		var launchButton = document.getElementById('launch');
 		launchButton.addEventListener('click', function() {
 			if(active == false){
@@ -212,6 +245,19 @@
 		var speedInput = document.getElementById('speed');
 		speedInput.addEventListener('change', function() {
 			speed = (parseInt(speedInput.value) > 0)? speedInput.value : speed;
+			speed = parseInt(speed);
+			if(active)
+				createTimeRepresentation(frame,repEnd,repPas,speed);
+		 }, true);
+		 
+		 //Listen to step input
+		
+		var stepInput = document.getElementById('step');
+		stepInput.addEventListener('change', function() {
+			repPas = (parseInt(stepInput.value) > 0)? stepInput.value : repPas;
+			repPas = parseInt(repPas);
+			if(active)
+				createTimeRepresentation(frame,repEnd,repPas,speed);
 		 }, true);
 		 
 		//Listen to number of measurements input
@@ -219,23 +265,13 @@
 		var mesInput = document.getElementById('measurements');
 		mesInput.addEventListener('change', function() {
 			numMes = (parseInt(mesInput.value) >= 100)? mesInput.value : numMes;
+			numMes = parseInt(numMes);
+			launchButton.innerHTML = "Launch";
+			active = false;
+			d3.selectAll("svg").remove();
+			d3.select("#progress").style("display","block");
+			getFile(0, false);
 		 }, true);
-		
-		//Create variable for more practical use
-	
-		data.forEach(function(c,i) {
-			c.sensorRecords.forEach(function(d) {
-				d.date = parseDate(d.sensorObject[1].value);
-				d.x = distance.x*parseInt(i%5);
-				d.y = distance.y*parseInt(i/5);
-				d.prop = parseFloat(d.sensorObject[10].value);
-				d.propName = d.sensorObject[10].fieldName;
-			});
-			c.sensorRecords.sort(function(a, b) {
-				return a.date - b.date;
-			});
-			
-		});
 		
 		//Listen to the time scale form
 		
@@ -270,16 +306,6 @@
 			});
 			initColorAndScale();
 		}, true);
-		
-		//Create SVG
-		
-		svg = d3.select("body").append("svg")
-				.attr("width", width)
-				.attr("height", height);
-				
-		//Define range, color range and and create scale
-		
-		initColorAndScale();
 	}
 	
 	//Function for creating a color map at the time index given (between 1 and 1000)
