@@ -12,7 +12,7 @@
 		heightSVG = H;
 	
 	data = null;
-	var dataForm1, dataForm2, dataForm3, numMes;
+	var dataForm1, dataForm2, dataForm3, numMes, typeLine;
 	var idTS;
 	var form1 = document.getElementById('choice1');
 	var form2 = document.getElementById('choice2');
@@ -159,6 +159,7 @@
 	
 	var initialize = function(){
 		numMes = 1000;
+		typeLine = true;
 		
 		//Listen to form 1
 		form1.addEventListener('change', function() {
@@ -184,7 +185,7 @@
 			var p1 = findParser(id1);
 			var p2 = findParser(id2);
 			createProperty1(id1, p1);
-			createGraph(id1, id2, (p1 != parseFloat), (p2 != parseFloat), widthSVG, heightSVG);
+			createGraph(id1, id2, (p1 != parseFloat), (p2 != parseFloat), widthSVG, heightSVG, typeLine);
 		}, true);
 		
 		form3_2.addEventListener('change', function() {
@@ -193,7 +194,7 @@
 			var p1 = findParser(id1);
 			var p2 = findParser(id2);
 			createProperty2(id2,p2);
-			createGraph(id1, id2, (p1 != parseFloat), (p2 != parseFloat), widthSVG, heightSVG);
+			createGraph(id1, id2, (p1 != parseFloat), (p2 != parseFloat), widthSVG, heightSVG, typeLine);
 		}, true);
 		
 		 
@@ -204,6 +205,22 @@
 		    numMes = (parseInt(mesInput.value) >= 100)? mesInput.value : numMes;
 			loadData();
 		}, true);
+		
+		//Listen to graph type input
+		
+		var typeOfGraphListener = function() {
+			typeLine = (this.value == "line")?true:false;
+			var id1 = findIndexOf(form3_1.selectedIndex)
+			var id2 = findIndexOf(form3_2.selectedIndex)
+			var p1 = findParser(id1);
+			var p2 = findParser(id2);
+			createGraph(id1, id2, (p1 != parseFloat), (p2 != parseFloat), widthSVG, heightSVG , typeLine);
+		}
+		
+		var typeOfGraph = document.getElementsByName('styleGraph');
+		typeOfGraph[0].addEventListener('click', typeOfGraphListener, true);
+		typeOfGraph[1].addEventListener('click', typeOfGraphListener, true);
+
 		
 		//Set size of the containing div
 		

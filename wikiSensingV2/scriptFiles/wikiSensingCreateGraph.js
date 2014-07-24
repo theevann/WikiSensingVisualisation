@@ -1,4 +1,4 @@
-﻿	var createGraph = function(p1, p2, v1, v2, wdth, hgt){
+﻿	var createGraph = function(p1, p2, v1, v2, wdth, hgt, typeLine){
 		
 		var width = wdth;
 		var height = hgt;
@@ -103,18 +103,44 @@
 			.x(function(d) { return x(d.date); })
 			.y(function(d) { return y2(d.prop2) ; });
 
-		if(p1 != 0)
-		gr.append("path")
+		// Plot line/points graphs	
+		//For Property 1
+		
+		if(p1 != 0){ // If it's not "none"
+		if(typeLine)
+		  gr.append("path")
 			.datum(data.sensorRecords)
 			.attr("class", "line")
 			.attr("d", line[0])
 			.style("stroke", "#1f77b4");
+		else
+		  gr.selectAll('circle')
+			.data(function(d){ return data.sensorRecords})
+			.enter().append('circle')
+			.attr("cx", function(d) { return x(d.date) })
+			.attr("cy", function(d) { return y1(d.prop1) })
+			.attr("r", 3.5)
+			.style("fill", "white")
+			.style("stroke", "#1f77b4");
+		}
 		
-		if(p2 != 0)
-		gr.append("path")
+		//For Property 2
+
+		if(p2 != 0){ // If it's not "none"
+		if(typeLine)
+		  gr.append("path")
 			.datum(data.sensorRecords)
 			.attr("class", "line")
 			.attr("d", line[1])
 			.style("stroke", "#ff7f0e");
-		
+		else
+		  gr.selectAll('circle')
+			.data(function(d){ return data.sensorRecords})
+			.enter().append('circle')
+			.attr("cx", function(d) { return x(d.date) })
+			.attr("cy", function(d) { return y2(d.prop2) })
+			.attr("r", 3.5)
+			.style("fill", "white")
+			.style("stroke", "#ff7f0e");
+		}
 	};
