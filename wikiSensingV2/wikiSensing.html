@@ -1,0 +1,51 @@
+﻿<!doctype html>
+<html>
+
+<head>
+	<title>WikiSensing Data Visualisation</title>
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+	<script src="scriptFiles\d3-transform.js"></script>
+	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+	<link rel="stylesheet" type="text/css" href="../cssFiles/common.css" />
+	<link rel="stylesheet" type="text/css" href="cssFiles/wikiSensing.css" />
+</head>
+
+<body>
+	<div id="header">
+		<span id="title">WikiSensing Data Visualisation Tool</span>
+		<button id="back" onclick="window.location.href='../index.html'">Back to Index</button>
+	</div>
+	
+	<FORM id ="menu">
+		<label for="choice1">Service Key :</label>
+		<SELECT id="choice1" size="1">
+		</SELECT>
+		<label for="choice2">Sensor Id :</label>
+		<SELECT id="choice2" size="1">
+		</SELECT>
+		<label for="choice3_1">Property 1:</label>
+		<SELECT id="choice3_1" size="1" style="background:#1f77b4;">
+		</SELECT>
+		<label for="choice3_2">Property 2:</label>
+		<SELECT id="choice3_2" size="1" style="background:#ff7f0e;">
+		</SELECT>
+		<label for="measurements">Number of Measurements :</label> 
+		<input type="number" step="1" value="1000" min="10" max="100000" id="measurements"> <!-- ms / frame -->
+		Graph Style : 
+		<label for="measurements">Line</label> 
+		<INPUT type= "radio" name="styleGraph" value="line" checked>
+		<label for="measurements">Points</label> 		
+		<INPUT type= "radio" name="styleGraph" value="point"> 
+		<button id = "switch" type='button' style="width:60px">Map</button>
+	</FORM>
+	<div id="container">
+		<div id="mover">
+			<div id="map"></div>
+			<div id="chart"></div>
+		</div>
+	</div>
+</body>
+<script src="scriptFiles\wikiSensingMap.js"></script>
+<script src="scriptFiles\wikiSensingCreateGraph.js"></script>
+<script src="scriptFiles\wikiSensing.js"></script>
+</html>
