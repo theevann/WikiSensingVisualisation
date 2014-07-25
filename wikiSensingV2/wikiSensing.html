@@ -29,18 +29,28 @@
 		<label for="choice3_2">Property 2:</label>
 		<SELECT id="choice3_2" size="1" style="background:#ff7f0e;">
 		</SELECT>
-		<label for="measurements">Number of Measurements :</label> 
+		<label for="choice3_3">X axis :</label>
+		<SELECT id="choice3_3" size="1">
+		</SELECT>
+		<label for="floatOnly">Float Only :</label> 
+		<INPUT id = "floatOnly" type="checkbox" name="floatOnly" checked>
+		<label for="measurements">Measurements :</label> 
 		<input type="number" step="1" value="1000" min="10" max="100000" id="measurements"> <!-- ms / frame -->
-		Graph Style : 
+		<strong>Graph Style :</strong>
+		<label for="measurements">Curve</label> 
+		<INPUT type= "radio" name="styleGraph" value="basis" checked>
 		<label for="measurements">Line</label> 
-		<INPUT type= "radio" name="styleGraph" value="line" checked>
+		<INPUT type= "radio" name="styleGraph" value="linear">
 		<label for="measurements">Points</label> 		
 		<INPUT type= "radio" name="styleGraph" value="point"> 
+		<!--
 		<button id = "switch" type='button' style="width:60px">Map</button>
+		-->
 	</FORM>
 	<div id="container">
 		<div id="mover">
 			<div id="map"></div>
+			<div id="info"></div>
 			<div id="chart"></div>
 		</div>
 	</div>
