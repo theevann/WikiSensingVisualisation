@@ -21,7 +21,6 @@ var initTab2 = function(){
 				var checkB = document.getElementById('c' + (j + 1));
 				checkB.checked = false;
 				captorsUpdate.apply(checkB, []);
-
 			}
 		}, true);
 }
@@ -155,7 +154,7 @@ var createComparisonGraph = function(){
 			.attr("d", line[pNm-1])
 			.attr("captor",index)
 			.attr("prop",pNm)
-			.style("stroke", function(d) { if(pNm == 1) {return colors(index);} else {return d3.rgb(colors(index)).brighter(0.5);}  });
+			.style("stroke", function(d) { if(pNm == 1) {return colors(index);} else {return d3.rgb(colors(index)).darker();}  });
 		}
 		//*/  
 	}
@@ -219,6 +218,7 @@ var createComparisonGraph = function(){
 			});
 		}
 		drawAxis(p1,p2);
+		drawAllGraphsForProp(1);
 	}
 	
 	listProp1.on("change", propertyUpdateP1);	
