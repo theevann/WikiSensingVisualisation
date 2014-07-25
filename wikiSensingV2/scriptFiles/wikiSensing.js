@@ -79,6 +79,8 @@
 				return console.warn(error);
 				
 			data = json;
+			d3.select("#numberLoaded").text("(" + data.sensorRecords.length + " loaded)");
+
 			if(!data.sensorRecords[0]){ // If the data is empty, do nothing and remove options !!!
 				d3.selectAll("#choice3_1 option").remove();
 				d3.selectAll("#choice3_2 option").remove();
@@ -86,6 +88,7 @@
 				loadingData = false;
 				return;
 			}
+			
 			
 			if(updateF3) // If we need to update what is in forms 3 (in the case it's not the same 'Service key', or there is nothing in the forms)
 				updateForms3();
@@ -120,27 +123,17 @@
 	}
 	
 	var createProperty = function(id,p,prop){
-		if(id != 0){
-			data.sensorRecords.forEach(function(d,i) {
-				if(d.sensorObject[id]) //If value exists
-					d[prop] = (p != null)?p(d.sensorObject[id].value):d.sensorObject[id].value;
-				else // Otherwise we delete the entry
-					data.sensorRecords.splice(i,1);
-			});
-		}
-	}
-	
-	var createPropertyX = function(id,p){
-			data.sensorRecords.forEach(function(d,i) {
-				if(d.sensorObject[id]) //If value on x exists
-					d["x"] = (p != null)?p(d.sensorObject[id].value):d.sensorObject[id].value;
-				else // Otherwise we delete the entry
-					data.sensorRecords.splice(i,1);
-			});
-			
-			data.sensorRecords.sort(function(a, b) {
-				return a.x - b.x;
-			});
+		if(id == -1)
+			return;
+		
+		data.sensorRecords.forEach(function(d,i) {
+			if(d.sensorObject[id]) //If value exists
+				d[prop] = (p != null)?p(d.sensorObject[id].value):d.sensorObject[id].value;
+			else{ // Otherwise we delete the entry
+				console.log("Suppression : " + i);
+				data.sensorRecords.splice(i,1);
+				}
+		});	
 	}
 	
 	var createAllProperties = function(){
@@ -151,9 +144,12 @@
 		id = findIndexOfID(form3_2.selectedIndex);
 		p = findParser(id);
 		createProperty(id,p,"prop2");
-		id = findXIndexOf(form3_3.selectedIndex);
+		id = findIndexOfID(form3_3.selectedIndex);
 		p = findParser(id);
-		createPropertyX(id,p);
+		createProperty(id,p,"x");
+		data.sensorRecords.sort(function(a, b) {
+			return a.x - b.x;
+		});
 	}
 	
 	//We got the name => we want the id in the data array...
@@ -171,17 +167,7 @@
 	
 	var findIndexOfID = function(id){
 		var name = form3_1.options[id].value;
-		var idT = 0;
-		data.sensorRecords[0].sensorObject.forEach(function(d,i) {
-				if(d.fieldName == name)
-					idT = i;
-		});
-		return idT;
-	}
-	
-	var findXIndexOf = function(id){
-		var name = form3_3.options[id].value;
-		var idT = 0;
+		var idT = -1;
 		data.sensorRecords[0].sensorObject.forEach(function(d,i) {
 				if(d.fieldName == name)
 					idT = i;
@@ -192,6 +178,9 @@
 	//Find the good parser for the data
 	
 	var findParser = function(id){
+		if(id == -1)
+			return null;
+			
 		var p = parseFloat;
 		var value = data.sensorRecords[0].sensorObject[id].value;
 		parser.forEach(function(d,i) {
@@ -242,9 +231,12 @@
 		}, true);
 		
 		form3_3.addEventListener('change', function() {
-			var id = findXIndexOf(form3_3.selectedIndex);
+			var id = findIndexOfID(form3_3.selectedIndex);
 			var p = findParser(id);
-			createPropertyX(id,p);
+			createProperty(id,p,"x");
+			data.sensorRecords.sort(function(a, b) {
+				return a.x - b.x;
+			}); 
 			launchGraph();
 			}, true);
 		
@@ -281,7 +273,7 @@
 		launchGraph = function() {
 			var id1 = findIndexOfID(form3_1.selectedIndex)
 			var id2 = findIndexOfID(form3_2.selectedIndex)
-			var id3 = findXIndexOf(form3_3.selectedIndex);
+			var id3 = findIndexOfID(form3_3.selectedIndex);
 			var p1 = findParser(id1);
 			var p2 = findParser(id2);
 			var p = findParser(id3);
@@ -302,7 +294,6 @@
 				offset += e.offsetTop;
 				e = e.offsetParent;
 			}
-			console.log(offset);
 			heightSVG = (0.95*(H-offset));
 			container.style("height", heightSVG + "px")
 					.style("width","100%");

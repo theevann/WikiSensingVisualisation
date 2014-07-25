@@ -1,14 +1,19 @@
-﻿
-	var createGraph = function(p1, p2, p, typeY1, typeY2, typeX, wdth, hgt, typeGraph){
+﻿(function(){
+	
+	var svg;
+	var width, height, graphHeight, graphWidth;
+	
+	createGraph = function(p1, p2, p, typeY1, typeY2, typeX, wdth, hgt, typeGraph){
 		
-		var width = wdth;
-		var height = hgt;
+		width = wdth;
+		height = hgt;
 		
-		var graphHeight = parseInt(0.95*height);
-		var graphWidth = parseInt(0.85*width);
+		graphHeight = parseInt(0.95*height);
+		graphWidth = parseInt(0.85*width);
+		var x, y1, y2, y1Axis, y2Axis;
 		
 		d3.selectAll("svg").remove();
-		var svg = d3.select("#chart").append("svg")
+		svg = d3.select("#chart").append("svg")
 			.attr("width", width)
 			.attr("height", height)
 			
@@ -20,8 +25,7 @@
 				
 		var colors = d3.scale.category20();
 		
-		if((p1+p2) != 0){ // If there is something to plot
-		
+		if((p1+p2) != -2){ // If there is something to plot
 			if(typeX == 0)
 				x = d3.time.scale()
 					.domain([data.sensorRecords[0].x, data.sensorRecords[data.sensorRecords.length - 1].x]);
@@ -53,31 +57,8 @@
 			  .call(xAxis)
 		}
 		
-		if(p1 != 0){ // If property 1 is different from "None"
-			if(typeY1 == 0)
-				y1 = d3.time.scale()
-					.domain([
-							d3.min(data.sensorRecords, function(d) { return d.prop1; }),
-							d3.max(data.sensorRecords, function(d) { return d.prop1; })
-							]);
-			else if(typeY1 == 1)
-				y1 = d3.scale.linear()
-					.domain([
-							d3.min(data.sensorRecords, function(d) { return d.prop1; }),
-							d3.max(data.sensorRecords, function(d) { return d.prop1; })
-							]);
-			else{
-				var y1Domain = new Array(); 
-				data.sensorRecords.forEach(function(d,i) {
-					if(y1Domain.indexOf(d.prop1) == -1)
-						y1Domain.push(d.prop1);
-				});
-				
-				y1 = d3.scale.ordinal()
-					.domain(y1Domain);
-			}
-			
-			y1.range([graphHeight, 0]);
+		if(p1 != -1){ // If property 1 is different from "None"
+			y1 = initAxis(typeY1, y1, "prop1"); // Define the type of axis and the domain
 			
 			y1Axis = d3.svg.axis()
 				.scale(y1)
@@ -91,35 +72,13 @@
 			  .attr("y", 6)
 			  .attr("dy", ".71em")
 			  .style("text-anchor", "end")
+			  .style("color", "#1f77b4")
 			  .text(data.sensorRecords[0].sensorObject[p1].fieldName);
 		}
 		
-		if(p2 != 0){ // If property 2 is different from "None"
-			if(typeY2 == 0) // If a time parser succeed in parsing the data
-				y2 = d3.time.scale()
-					.domain([
-							d3.min(data.sensorRecords, function(d) { return d.prop2; }),
-							d3.max(data.sensorRecords, function(d) { return d.prop2; })
-							]);
-			else if(typeY2 == 1) // Else, if the float parser succeed in parsing the data
-				y2 = d3.scale.linear()
-					.domain([
-							d3.min(data.sensorRecords, function(d) { return d.prop2; }),
-							d3.max(data.sensorRecords, function(d) { return d.prop2; })
-							]);
-			else{ // If it's a string ...
-				var y2Domain = new Array(); 
-				data.sensorRecords.forEach(function(d,i) {
-					if(y2Domain.indexOf(d.prop1) == -1)
-						y2Domain.push(d.prop1);
-				});
-				
-				y2 = d3.scale.ordinal()
-					.domain(y2Domain);
-			}			
+		if(p2 != -1){ // If property 2 is different from "None"
+			y2 = initAxis(typeY2, y2, "prop2"); // Define the type of axis and the domain
 			
-			y2.range([graphHeight, 0]);
-
 			y2Axis = d3.svg.axis()
 				.scale(y2)
 				.orient("right");
@@ -133,6 +92,7 @@
 			  .attr("y", -20)
 			  .attr("dy", ".71em")
 			  .style("text-anchor", "end")
+			  .style("stroke", "#ff7f0e")
 			  .text(data.sensorRecords[0].sensorObject[p2].fieldName);		
 		}
 		
@@ -151,41 +111,70 @@
 		// Plot line/points graphs	
 		//For Property 1
 		
-		if(p1 != 0){ // If it's not "none"
-		if(typeGraph != "point")
-		  gr.append("path")
-			.datum(data.sensorRecords)
-			.attr("class", "line")
-			.attr("d", line[0])
-			.style("stroke", "#1f77b4");
-		else
-		  gr.selectAll('circle .c1')
-			.data(function(d){ return data.sensorRecords})
-			.enter().append('circle').attr("class","c1")
-			.attr("cx", function(d) { return x(d.x) })
-			.attr("cy", function(d) { return y1(d.prop1) })
-			.attr("r", 3.5)
-			.style("fill", "white")
-			.style("stroke", "#1f77b4");
+		if(p1 != -1){ // If it's not "none"
+			if(typeGraph != "point")
+			  gr.append("path")
+				.datum(data.sensorRecords)
+				.attr("class", "line")
+				.attr("d", line[0])
+				.style("stroke", "#1f77b4");
+			else
+			  gr.selectAll('circle .c1')
+				.data(function(d){ return data.sensorRecords})
+				.enter().append('circle').attr("class","c1")
+				.attr("cx", function(d) { return x(d.x) })
+				.attr("cy", function(d) { return y1(d.prop1) })
+				.attr("r", 3.5)
+				.style("fill", "white")
+				.style("stroke", "#1f77b4");
 		}
 		
 		//For Property 2
 
-		if(p2 != 0){ // If it's not "none"
-		if(typeGraph != "point")
-		  gr.append("path")
-			.datum(data.sensorRecords)
-			.attr("class", "line")
-			.attr("d", line[1])
-			.style("stroke", "#ff7f0e");
-		else
-		  gr.selectAll('circle .c2')
-			.data(function(d){ return data.sensorRecords})
-			.enter().append('circle').attr("class","c2")
-			.attr("cx", function(d) { return x(d.x) })
-			.attr("cy", function(d) { return y2(d.prop2) })
-			.attr("r", 3.5)
-			.style("fill", "white")
-			.style("stroke", "#ff7f0e");
+		if(p2 != -1){ // If it's not "none"
+			if(typeGraph != "point")
+			  gr.append("path")
+				.datum(data.sensorRecords)
+				.attr("class", "line")
+				.attr("d", line[1])
+				.style("stroke", "#ff7f0e");
+			else
+			  gr.selectAll('circle .c2')
+				.data(function(d){ return data.sensorRecords})
+				.enter().append('circle').attr("class","c2")
+				.attr("cx", function(d) { return x(d.x) })
+				.attr("cy", function(d) { return y2(d.prop2) })
+				.attr("r", 3.5)
+				.style("fill", "white")
+				.style("stroke", "#ff7f0e");
 		}
 	};
+	
+	var initAxis = function(typeY, y, prop){
+		if(typeY == 0) // If a time parser succeed in parsing the data
+			y = d3.time.scale()
+				.domain([
+						d3.min(data.sensorRecords, function(d) { return d[prop]; }),
+						d3.max(data.sensorRecords, function(d) { return d[prop]; })
+						]);
+		else if(typeY == 1) // Else, if the float parser succeed in parsing the data
+			y = d3.scale.linear()
+				.domain([
+						d3.min(data.sensorRecords, function(d) { return d[prop]; }),
+						d3.max(data.sensorRecords, function(d) { return d[prop]; })
+						]);
+		else{ // If it's a string ...
+			var yDomain = new Array(); 
+			data.sensorRecords.forEach(function(d,i) {
+				if(yDomain.indexOf(d.prop) == -1)
+					yDomain.push(d.prop);
+			});
+			
+			y = d3.scale.ordinal()
+				.domain(yDomain);
+		}			
+		
+		y.range([graphHeight, 0]);
+		return y;
+	}
+})();
