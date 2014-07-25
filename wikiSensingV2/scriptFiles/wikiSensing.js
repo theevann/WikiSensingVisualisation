@@ -12,12 +12,13 @@
 		heightSVG = H;
 	
 	data = null;
-	var dataForm1, dataForm2, dataForm3, numMes, typeLine;
-	var idTS;
+	var dataForm1, dataForm2, dataForm3, numMes, typeGraph, loadingData;
+
 	var form1 = document.getElementById('choice1');
 	var form2 = document.getElementById('choice2');
 	var form3_1 = document.getElementById('choice3_1');
 	var form3_2 = document.getElementById('choice3_2');
+	var form3_3 = document.getElementById('choice3_3');
 	var parseDate = d3.time.format("%Y-%m-%dT%H:%M:%SZ").parse;
 	var parseDate1 = d3.time.format("%Y-%m-%d").parse;
 	var parseTime = d3.time.format("%H:%M:%S").parse;
@@ -63,32 +64,36 @@
 				});
 				
 				// Triggering of loadData not to have an empty graph
-				loadData();
+				loadData(true);
 		});
 	}
 		
-	var loadData = function(){
+	var loadData = function(updateF3){
+		if(loadingData) // Variable 'loading Data' not to load different data in the same time
+			return;
+		else
+			loadingData = true;
+	
 		d3.json("http://wikisensing.org/WikiSensingServiceAPI/" + form1.options[form1.selectedIndex].value + "/" + form2.options[form2.selectedIndex].value + "/" + numMes , function(error, json) {
 			if (error)
 				return console.warn(error);
-			
+				
 			data = json;
-			if(!data.sensorRecords[0])
+			if(!data.sensorRecords[0]){ // If the data is empty, do nothing and remove options !!!
+				d3.selectAll("#choice3_1 option").remove();
+				d3.selectAll("#choice3_2 option").remove();
+				d3.selectAll("#choice3_3 option").remove();
+				loadingData = false;
 				return;
+			}
 			
-			findIndexTimeStamp();
-			data.sensorRecords.forEach(function(d, i) {
-				if(d.sensorObject[idTS])
-					d.date = parseDate(d.sensorObject[idTS].value);
-				else
-					data.sensorRecords.splice(i,1);
-			});
-			
-			data.sensorRecords.sort(function(a, b) {
-				return a.date - b.date;
-			});
-			
-			updateForms3();
+			if(updateF3) // If we need to update what is in forms 3 (in the case it's not the same 'Service key', or there is nothing in the forms)
+				updateForms3();
+			else{ // Otherwise we do not update the form, but loading Data implies "computing" it
+				createAllProperties(); // We create the properties
+				launchGraph(); // We show the graph
+			}
+			loadingData = false;
 		});
 	}
 	
@@ -96,47 +101,86 @@
 		//Remove previous options
 		d3.selectAll("#choice3_1 option").remove();
 		d3.selectAll("#choice3_2 option").remove();
-	
+		d3.selectAll("#choice3_3 option").remove();
+		
 		//Add new options
-		var choice3 = d3.selectAll("#choice3_1, #choice3_2");
-		choice3.append("option")
-			   .text("None");
+		var choice3 = d3.selectAll("#choice3_1, #choice3_2 ,#choice3_3");
+		
+		choice3.append("option").text("None");
 		data.sensorRecords[0].sensorObject.forEach(function(d) {
-			if(!isNaN(parseFloat(d.value)))
+			if(!isNaN(parseFloat(d.value))){
 				choice3.append("option")
 				   .text(d.fieldName);
+			}
+			else if(!floatValuesOnly){
+				choice3.append("option")
+				   .text(d.fieldName);
+			}
 		});
 	}
 	
-	var createProperty1 = function(id,p){
+	var createProperty = function(id,p,prop){
 		if(id != 0){
-			data.sensorRecords.forEach(function(d) {
-					d.prop1 = p(d.sensorObject[id].value);
+			data.sensorRecords.forEach(function(d,i) {
+				if(d.sensorObject[id]) //If value exists
+					d[prop] = (p != null)?p(d.sensorObject[id].value):d.sensorObject[id].value;
+				else // Otherwise we delete the entry
+					data.sensorRecords.splice(i,1);
 			});
 		}
 	}
 	
-	var createProperty2 = function(id,p){
-		if(id != 0){
-			data.sensorRecords.forEach(function(d) {
-					d.prop2 = p(d.sensorObject[id].value);
+	var createPropertyX = function(id,p){
+			data.sensorRecords.forEach(function(d,i) {
+				if(d.sensorObject[id]) //If value on x exists
+					d["x"] = (p != null)?p(d.sensorObject[id].value):d.sensorObject[id].value;
+				else // Otherwise we delete the entry
+					data.sensorRecords.splice(i,1);
 			});
-		}
+			
+			data.sensorRecords.sort(function(a, b) {
+				return a.x - b.x;
+			});
 	}
 	
-	//Fin the index of the time stamp value in the data array 
+	var createAllProperties = function(){
+		var id, p;
+		id = findIndexOfID(form3_1.selectedIndex);
+		p = findParser(id);
+		createProperty(id,p,"prop1");
+		id = findIndexOfID(form3_2.selectedIndex);
+		p = findParser(id);
+		createProperty(id,p,"prop2");
+		id = findXIndexOf(form3_3.selectedIndex);
+		p = findParser(id);
+		createPropertyX(id,p);
+	}
 	
-	var findIndexTimeStamp = function(){
+	//We got the name => we want the id in the data array...
+	
+	var findIndexOfName = function(name){
+		var idT = 0;
 		data.sensorRecords[0].sensorObject.forEach(function(d,i) {
-				if(d.fieldName == "TimeStamp")
-					idTS = i;
+				if(d.fieldName == name)
+					idT = i;
 		});
+		return idT;
 	}
 	
 	//We got the id in the form => we want the id in the data array...
 	
-	var findIndexOf = function(id){
+	var findIndexOfID = function(id){
 		var name = form3_1.options[id].value;
+		var idT = 0;
+		data.sensorRecords[0].sensorObject.forEach(function(d,i) {
+				if(d.fieldName == name)
+					idT = i;
+		});
+		return idT;
+	}
+	
+	var findXIndexOf = function(id){
+		var name = form3_3.options[id].value;
 		var idT = 0;
 		data.sensorRecords[0].sensorObject.forEach(function(d,i) {
 				if(d.fieldName == name)
@@ -154,12 +198,18 @@
 				if(d(value) != null)
 					p = parser[i];
 		});
+		
+		if(isNaN(parseFloat(value)))
+			p = null;
+		
 		return p;
 	}
 	
 	var initialize = function(){
-		numMes = 1000;
-		typeLine = true;
+		numMes = document.getElementById('measurements').value;
+		loadingData = false;
+		typeGraph = document.getElementsByName('styleGraph')[0].value;
+		floatValuesOnly = document.getElementById('floatOnly').checked;
 		
 		//Listen to form 1
 		form1.addEventListener('change', function() {
@@ -172,55 +222,74 @@
 		
 		//Listen to form 2
 		form2.addEventListener('change', function() {
-			loadData();
-			d3.selectAll("#choice3_1 option").remove();
-			d3.selectAll("#choice3_2 option").remove();
+			loadData(form3_1.selectedIndex == -1);
 			d3.select("svg").remove();
 		}, true);
 		
 		//Listen to forms 3
 		form3_1.addEventListener('change', function() {
-			var id1 = findIndexOf(form3_1.selectedIndex)
-			var id2 = findIndexOf(form3_2.selectedIndex)
-			var p1 = findParser(id1);
-			var p2 = findParser(id2);
-			createProperty1(id1, p1);
-			createGraph(id1, id2, (p1 != parseFloat), (p2 != parseFloat), widthSVG, heightSVG, typeLine);
+			var id = findIndexOfID(form3_1.selectedIndex);
+			var p = findParser(id);
+			createProperty(id,p,"prop1");
+			launchGraph();
 		}, true);
 		
 		form3_2.addEventListener('change', function() {
-			var id1 = findIndexOf(form3_1.selectedIndex)
-			var id2 = findIndexOf(form3_2.selectedIndex)
-			var p1 = findParser(id1);
-			var p2 = findParser(id2);
-			createProperty2(id2,p2);
-			createGraph(id1, id2, (p1 != parseFloat), (p2 != parseFloat), widthSVG, heightSVG, typeLine);
+			var id = findIndexOfID(form3_2.selectedIndex);
+			var p = findParser(id);
+			createProperty(id,p,"prop2");
+			launchGraph();
 		}, true);
 		
-		 
+		form3_3.addEventListener('change', function() {
+			var id = findXIndexOf(form3_3.selectedIndex);
+			var p = findParser(id);
+			createPropertyX(id,p);
+			launchGraph();
+			}, true);
+		
+		// Listen to the 'float only' checkbox
+		
+		var floatOnly = document.getElementById('floatOnly');
+		floatOnly.addEventListener('change', function() {
+		    floatValuesOnly = floatOnly.checked;
+			loadData(true);
+		}, true);
+		
 		//Listen to number of measurements input
 		
 		var mesInput = document.getElementById('measurements');
 		mesInput.addEventListener('change', function() {
 		    numMes = (parseInt(mesInput.value) >= 100)? mesInput.value : numMes;
-			loadData();
+			loadData(false);
 		}, true);
 		
 		//Listen to graph type input
 		
 		var typeOfGraphListener = function() {
-			typeLine = (this.value == "line")?true:false;
-			var id1 = findIndexOf(form3_1.selectedIndex)
-			var id2 = findIndexOf(form3_2.selectedIndex)
-			var p1 = findParser(id1);
-			var p2 = findParser(id2);
-			createGraph(id1, id2, (p1 != parseFloat), (p2 != parseFloat), widthSVG, heightSVG , typeLine);
+			typeGraph = this.value;
+			launchGraph();
 		}
 		
 		var typeOfGraph = document.getElementsByName('styleGraph');
-		typeOfGraph[0].addEventListener('click', typeOfGraphListener, true);
-		typeOfGraph[1].addEventListener('click', typeOfGraphListener, true);
+		for(var i = 0; i < typeOfGraph.length; i++)
+			typeOfGraph[i].addEventListener('click', typeOfGraphListener, true);
 
+		
+		// To create graphs
+		
+		launchGraph = function() {
+			var id1 = findIndexOfID(form3_1.selectedIndex)
+			var id2 = findIndexOfID(form3_2.selectedIndex)
+			var id3 = findXIndexOf(form3_3.selectedIndex);
+			var p1 = findParser(id1);
+			var p2 = findParser(id2);
+			var p = findParser(id3);
+			var typeY1 = (p1 == null)?2:((p1 == parseFloat)?1:0); 
+			var typeY2 = (p2 == null)?2:((p2 == parseFloat)?1:0); 
+			var typeX = (p == null)?2:((p == parseFloat)?1:0); 
+			createGraph(id1, id2, id3, typeY1, typeY2, typeX, widthSVG, heightSVG , typeGraph);
+		}
 		
 		//Set size of the containing div
 		
