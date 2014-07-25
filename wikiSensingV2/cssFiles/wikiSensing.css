@@ -37,24 +37,29 @@
 	transition: 2s;
 }
 
-#map, #chart{
+#map, #chart, #info{
 	height: 100%;
-	width : 50%;
 	float: left;
 	display: inline-block;
 }
 
+#info{
+	margin: 0% 1%;
+	width : 8%;
+	border-radius: 10px;
+	box-shadow: 3px 3px 6px 0 #A9A9A9;
+	padding: 0.2em 0em;
+}
+
 #map{
-	/*background: red;*/
+	width : 40%;
 }
 
 #chart{
-	/*background: blue;*/
+	width : 50%;
 }
-/*
+
 #mover:hover{
 	margin-left:0;
 	transition: 2s;
 }
-*/
-*/
