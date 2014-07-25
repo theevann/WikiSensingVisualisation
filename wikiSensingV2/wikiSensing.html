@@ -38,15 +38,15 @@
 		<input type="number" step="1" value="1000" min="10" max="100000" id="measurements"> <!-- ms / frame -->
 		<span id ="numberLoaded"></span>
 		<strong>Graph Style :</strong>
-		<label for="measurements">Curve</label> 
-		<INPUT type= "radio" name="styleGraph" value="basis" checked>
-		<label for="measurements">Line</label> 
-		<INPUT type= "radio" name="styleGraph" value="linear">
-		<label for="measurements">Points</label> 		
-		<INPUT type= "radio" name="styleGraph" value="point"> 
-		<!--
-		<button id = "switch" type='button' style="width:60px">Map</button>
-		-->
+		<label for="r1">Curve</label> 
+		<INPUT id="r1" type= "radio" name="styleGraph" value="basis" checked>
+		<label for="r2">Line</label> 
+		<INPUT id="r2" type= "radio" name="styleGraph" value="linear">
+		<label for="r3">Points</label> 		
+		<INPUT id="r3" type= "radio" name="styleGraph" value="point"> 
+		<!-- -->
+		<button id = "switch" type='button' style="width:60px" onclick="switchLayer()">Switch</button>
+		<!---->
 	</FORM>
 	<div id="container">
 		<div id="mover">

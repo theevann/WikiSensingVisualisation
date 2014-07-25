@@ -64,14 +64,18 @@
 				.text(d.sensorId);
 			});
 			
+			//Create Map markers if there is
+			clearMap();
+			if(createMarkers())
+				switchLayer("map");
 			// Triggering of loadData not to have an empty graph
 			loadData(true);
 		});
 	}
 		
-	var loadData = function(updateF3){
+	loadData = function(updateF3){
 		if(loadingData) // Variable 'loading Data' not to load different data in the same time
-			return;
+			return;	
 		else
 			loadingData = true;
 	
@@ -302,7 +306,6 @@
 		
 		// Pour l'instant on créé la map ici ...
 		createMap();
-		createMarkers();
 		
 		//Initial loading of form 1
 		loadForm1();
