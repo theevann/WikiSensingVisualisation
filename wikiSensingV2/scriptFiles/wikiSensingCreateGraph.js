@@ -72,7 +72,7 @@
 			  .attr("y", 6)
 			  .attr("dy", ".71em")
 			  .style("text-anchor", "end")
-			  .style("color", "#1f77b4")
+			  .style("stroke", "#1f77b4")
 			  .text(data.sensorRecords[0].sensorObject[p1].fieldName);
 		}
 		

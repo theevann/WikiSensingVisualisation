@@ -12,7 +12,8 @@
 		heightSVG = H;
 	
 	data = null;
-	var dataForm1, dataForm2, dataForm3, numMes, typeGraph, loadingData;
+	dataForm1 = null, dataForm2 = null, dataForm3 = null;
+	var numMes, typeGraph, loadingData;
 
 	var form1 = document.getElementById('choice1');
 	var form2 = document.getElementById('choice2');
@@ -32,39 +33,39 @@
 
 	var loadForm1 = function(){
 		d3.json("http://wikisensing.org/WikiSensingServiceAPI/", function(error, json) {
-				if (error) return console.warn(error);
-				dataForm1 = json;
-				console.log (dataForm1);
-				
-				dataForm1.publicKeyList.forEach(function(d) {
-					d3.select("#choice1")
-					.append("option")
-					.text(d.ServiceKey);
-				});
-				
-				// Initial triggering of loadForm2 not to have an empty form
-				loadForm2();
+			if (error) return console.warn(error);
+			dataForm1 = json;
+			console.log (dataForm1);
+			
+			dataForm1.publicKeyList.forEach(function(d) {
+				d3.select("#choice1")
+				.append("option")
+				.text(d.ServiceKey);
+			});
+			
+			// Initial triggering of loadForm2 not to have an empty form
+			loadForm2();
 		});
 	}
 	
 	var loadForm2 = function(){
 		d3.json("http://wikisensing.org/WikiSensingServiceAPI/" + form1.options[form1.selectedIndex].value, function(error, json) {
-				if (error) return console.warn(error);
-				dataForm2 = json;
-				console.log (dataForm2);
-				
-				//Remove previous options
-				d3.selectAll("#choice2 option").remove();
-				
-				//Add options to form
-				dataForm2.sensor.forEach(function(d) {
-					d3.select("#choice2")
-					.append("option")
-					.text(d.sensorId);
-				});
-				
-				// Triggering of loadData not to have an empty graph
-				loadData(true);
+			if (error) return console.warn(error);
+			dataForm2 = json;
+			console.log (dataForm2);
+			
+			//Remove previous options
+			d3.selectAll("#choice2 option").remove();
+			
+			//Add options to form
+			dataForm2.sensor.forEach(function(d) {
+				d3.select("#choice2")
+				.append("option")
+				.text(d.sensorId);
+			});
+			
+			// Triggering of loadData not to have an empty graph
+			loadData(true);
 		});
 	}
 		
@@ -301,6 +302,7 @@
 		
 		// Pour l'instant on créé la map ici ...
 		createMap();
+		createMarkers();
 		
 		//Initial loading of form 1
 		loadForm1();
