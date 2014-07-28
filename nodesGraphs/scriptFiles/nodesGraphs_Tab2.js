@@ -23,6 +23,17 @@ var initTab2 = function(){
 				captorsUpdate.apply(checkB, []);
 			}
 		}, true);
+		
+		d3.selectAll(".hover").on("mouseover", function(d,i){
+			if(!document.getElementById("c"+(i+1)).checked) return;
+			d3.selectAll("#capt"+i+" path").style("stroke-width","4px");
+			d3.selectAll("svg>g>g:not(#capt"+i+") path").style("opacity","0.4");
+		});
+		d3.selectAll(".hover").on("mouseout", function(d,i){
+			if(!document.getElementById("c"+(i+1)).checked) return;
+			d3.selectAll("#capt"+i+" path").style("stroke-width","1.5px");
+			d3.selectAll("svg>g>g:not(#capt"+i+") path").style("opacity","1");
+		});
 }
 		
 var createComparisonGraph = function(){
@@ -100,9 +111,19 @@ var createComparisonGraph = function(){
 //--------
 	
 	// - FUNCTION CAPTORS_UPDATE
-	captorsUpdate = function(){
-		var index = parseInt(/[0-9]+/.exec(this.id)[0]);
-			if (this.checked) {
+	captorsUpdate = function(ind){
+		var cap, index;
+		if(ind){
+			cap = document.getElementById("c"+ind);
+			index = ind;
+		}
+		else{
+			cap = this;
+			console.log(cap);
+			index = parseInt(/[0-9]+/.exec(cap.id)[0]);
+		}
+		
+			if (cap.checked) {
 				data[index-1].sensorRecords.forEach(function(d) {
 					d.prop1 = d.sensorObject[p1].value;
 				});
@@ -145,7 +166,7 @@ var createComparisonGraph = function(){
 		
 		if(typeof myPath != "undefined"){
 			myPath.datum(data[index].sensorRecords)
-				.attr("d", line[pNm-1]);
+				.attr("d", line[pNm-1])
 		}
 		else{
 			d3.select("#capt" + index ).append("path")
@@ -154,7 +175,7 @@ var createComparisonGraph = function(){
 			.attr("d", line[pNm-1])
 			.attr("captor",index)
 			.attr("prop",pNm)
-			.style("stroke", function(d) { if(pNm == 1) {return colors(index);} else {return d3.rgb(colors(index)).darker();}  });
+			.style("stroke", function(d) { if(pNm == 1) {return colors(index);} else {return d3.rgb(colors(index)).darker(0.5);}  });
 		}
 		//*/  
 	}
