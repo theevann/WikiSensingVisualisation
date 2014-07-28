@@ -39,6 +39,16 @@
 		d3.select("#options").transition().duration(500).style("right",(options)?d3.select("#options").style("width"):"0px");
 	}
 	
+	showInfos = function(id){
+		d3.selectAll("#in-info ul li").remove();
+		d3.select("#in-info ul").append("li").text("Sensor ID : " + dataForm2.sensor[id].sensorId);
+		dataForm2.sensor[id].sensorObject.forEach(function(d) {
+			d3.select("#in-info ul")
+			.append("li")
+			.text(d.fieldName + " : " + d.value);
+		});
+	}
+	
 	var loadForm1 = function(){
 		d3.json("http://wikisensing.org/WikiSensingServiceAPI/", function(error, json) {
 			if (error) return console.warn(error);
@@ -72,10 +82,14 @@
 				.text(d.sensorId);
 			});
 			
+			//Show infos on first captor
+			showInfos(0);
+			
 			//Create Map markers if this is possible
 			clearMap();
 			if(createMarkers() && autoMap)
 				switchLayer("map"); // Switch to map if there is something to display and user wants to
+				
 			// Triggering of loadData not to have an empty graph
 			loadData(true);
 		});
@@ -103,7 +117,7 @@
 			}
 			
 			
-			if(updateF3) // If we need to update what is in forms 3 (in the case it's not the same 'Service key', or there is nothing in the forms)
+			if(updateF3 || (form3_1.selectedIndex == -1)) // If we need to update what is in forms 3 (in the case it's not the same 'Service key', or there is nothing in the forms)
 				updateForms3();
 			else{ // Otherwise we do not update the form, but loading Data implies "computing" it
 				createAllProperties(); // We create the properties
@@ -218,6 +232,30 @@
 		return p;
 	}
 	
+	// Handling arrows
+	
+	
+	
+	applyKey = function (_event_){
+	
+		// --- Retrieve event object from current web explorer
+		var winObj = window.event || _event_;
+		var intKeyCode = winObj.keyCode;
+		
+		if ( intKeyCode == 39 ){
+			switchLayer("graph");
+			winObj.keyCode = intKeyCode = 5019;
+			winObj.returnValue = false;
+			return false;
+		}
+		else if ( intKeyCode == 37 ){
+			switchLayer("map");
+			winObj.keyCode = intKeyCode = 5019;
+			winObj.returnValue = false;
+			return false;
+		}
+	}
+	
 	var initialize = function(){
 		numMes = document.getElementById('measurements').value;
 		loadingData = false;
@@ -235,7 +273,8 @@
 		
 		//Listen to form 2
 		form2.addEventListener('change', function() {
-			loadData(form3_1.selectedIndex == -1);
+			loadData(false); // We load the data and we update the forms 3_* if there is nothing inside...
+			showInfos(form2.selectedIndex);
 			d3.select("svg").remove();
 		}, true);
 		
@@ -307,7 +346,16 @@
 		var typeOfGraph = document.getElementsByName('styleGraph');
 		for(var i = 0; i < typeOfGraph.length; i++)
 			typeOfGraph[i].addEventListener('click', typeOfGraphListener, true);
-
+		
+		//Plot button
+		
+		var plotButton = document.getElementById('bPlot');
+		plotButton.addEventListener('click', function() {
+			document.getElementById('choice2').selectedIndex = plotButton.value;
+			loadData(false);
+			launchGraph();
+			switchLayer();
+		}, true);
 		
 		// To create graphs
 		

@@ -37,6 +37,7 @@
 		
 		<!-- -->
 		<button id = "switch" type='button' style="/*width:60px;*/" onclick="switchLayer()">Map / Graph</button>
+		<!-- 
 		<button id = "switch" type='button' style="width:60px;float:right;" onclick="switchOptions()" >Options</button>
 		<!---->
 	</FORM>
@@ -46,11 +47,16 @@
 			<div id="container-3">
 				<div id="mover">
 					<div id="map"></div>
-					<div id="info"><div id="in-info"></div></div>
+					<div id="info"><div id="in-info">
+					<h2>Sensor Information</h2>
+					<ul></ul>
+					<button id = "bPlot" type='button' style="" value="0" >Plot</button>
+					</div></div>
 					<div id="chart"><p id = "textInfo" style="text-align:center;">Choose a property to display ...</p></div>
 				</div>
 			</div>
 			<div id="options">
+				<div id="bOption" onclick="switchOptions()">O</div>
 				<div id="in-options">
 					<h2>Options</h2>
 					<ul>
@@ -100,4 +106,5 @@
 <script src="scriptFiles\wikiSensingMap.js"></script>
 <script src="scriptFiles\wikiSensingCreateGraph.js"></script>
 <script src="scriptFiles\wikiSensing.js"></script>
+<script language="javascript">document.onkeydown = applyKey;</script>
 </html>

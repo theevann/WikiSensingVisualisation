@@ -58,13 +58,31 @@ h2{
 		right: 0px;
 		background-color: black;
 		z-index: 10;
-		opacity: 0.85;
+		opacity: 0.9;
 		height: 100%;
 		float:left;
 		color: white;
-		border-top-left-radius: 10px;
 		border-bottom-left-radius: 10px;
 		box-shadow: 3px 3px 6px 0 #A9A9A9;
+}
+
+#bOption{
+	position:absolute;
+	left:-1.4em;
+	width: 1.4em;
+	height: 1.2em;
+	text-align: center;
+	display: inline-block;
+	border-top-left-radius: 10px;
+	border-bottom-left-radius: 10px;
+	background-color: black;
+	font-size: 1.4em;
+	opacity: 0.5;
+	cursor: pointer;
+}
+
+#bOption:hover{
+	opacity : 1;
 }
 
 #mover{
@@ -90,6 +108,13 @@ h2{
 	border-radius: 10px;
 	box-shadow: 3px 3px 6px 0 #A9A9A9;
 	padding: 0.2em 0em;
+}
+
+#bPlot{
+	width: 90%;
+	margin: auto;
+	height: 35px;
+	display: block;
 }
 
 #map{

@@ -26,13 +26,16 @@
 					position: new google.maps.LatLng(d.sensorObject[3].value, d.sensorObject[4].value),
 					map: sensorMap
 				})
-				google.maps.event.addListener(marker, 'click', function(event) {
+				google.maps.event.addListener(marker, 'dblclick', function(event) {
 					document.getElementById('choice2').selectedIndex = i;
 					loadData(false);
 					switchLayer();
 					launchGraph();
 				});
-				//*
+				google.maps.event.addListener(marker, 'click', function(event) {
+					d3.select("#bPlot").attr("value",i);
+					showInfos(i);
+				});
 				google.maps.event.addListener(marker, 'mouseover', function(event) {
 					infowindow.setContent("<div id ='content'><h2>" + d.sensorId + "</h2>" + "<p>" + d.sensorObject[5].value + "</p></div>");
 					infowindow.setPosition(marker.position);
