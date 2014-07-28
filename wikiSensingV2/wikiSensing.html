@@ -29,17 +29,15 @@
 		<label for="choice3_2">Property 2:</label>
 		<SELECT id="choice3_2" size="1" style="background:#ff7f0e;">
 		</SELECT>
+		<span id = "choiceX">
 		<label for="choice3_3">X axis :</label>
 		<SELECT id="choice3_3" size="1">
 		</SELECT>
-		<label for="floatOnly">Float Only :</label> 
-		<INPUT id = "floatOnly" type="checkbox" name="floatOnly" checked>
-		<label for="measurements">Measurements :</label> 
-		<input type="number" step="1" value="1000" min="10" max="100000" id="measurements"> <!-- ms / frame -->
-		<span id ="numberLoaded"></span>
+		</span>
 		
 		<!-- -->
-		<button id = "switch" type='button' style="width:60px" onclick="switchLayer()">Switch</button>
+		<button id = "switch" type='button' style="/*width:60px;*/" onclick="switchLayer()">Map / Graph</button>
+		<button id = "switch" type='button' style="width:60px;float:right;" onclick="switchOptions()" >Options</button>
 		<!---->
 	</FORM>
 	
@@ -48,19 +46,52 @@
 			<div id="container-3">
 				<div id="mover">
 					<div id="map"></div>
-					<div id="info"></div>
-					<div id="chart"></div>
+					<div id="info"><div id="in-info"></div></div>
+					<div id="chart"><p id = "textInfo" style="text-align:center;">Choose a property to display ...</p></div>
 				</div>
 			</div>
 			<div id="options">
 				<div id="in-options">
-					<strong>Graph Style :</strong>
+					<h2>Options</h2>
+					<ul>
+					<li>
+					<p class="opt">Graph Style :</p>
+					<p>
 					<label for="r1">Curve</label> 
 					<INPUT id="r1" type= "radio" name="styleGraph" value="basis" checked>
 					<label for="r2">Line</label> 
 					<INPUT id="r2" type= "radio" name="styleGraph" value="linear">
 					<label for="r3">Points</label> 		
-					<INPUT id="r3" type= "radio" name="styleGraph" value="point"> 
+					<INPUT id="r3" type= "radio" name="styleGraph" value="point">
+					</p>
+					</li>
+					<li>
+					<p>
+					<label for="measurements" class="opt">Number of measurements :</label>
+					</p>
+					<p>
+					<input type="number" step="1" value="1000" min="10" max="100000" id="measurements">
+					<span id ="numberLoaded"></span>
+					</p>
+					</li>
+					<li>
+					<p>
+					<label for="timestamp" class="opt">Use timestamp on X axis :</label> 
+					<input type="checkbox" id="timestamp" checked="checked">
+					<p>
+					</li>
+					<li>
+					<p>
+					<label for="floatOnly" class="opt">Display only 'float fields' :</label> 
+					<INPUT id = "floatOnly" type="checkbox" name="floatOnly" checked>
+					</p>
+					<li>
+					<p>
+					<label for="autoMap" class="opt">Automatically switch to map :</label> 
+					<INPUT id = "autoMap" type="checkbox" name="autoMap" checked>
+					</p>
+					</li>
+					</ul>
 				</div>
 			</div>
 		</div>

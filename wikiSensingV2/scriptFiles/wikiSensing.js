@@ -1,5 +1,9 @@
 ﻿(function(){
 	
+	data = null;
+	dataForm1 = null, dataForm2 = null, dataForm3 = null;
+	options = false;
+	
 	var w = window,
 		d = document,
 		e = d.documentElement,
@@ -11,10 +15,9 @@
 	var widthSVG = W,
 		heightSVG = H;
 	
-	data = null;
-	dataForm1 = null, dataForm2 = null, dataForm3 = null;
-	var numMes, typeGraph, loadingData;
-
+	var numMes, typeGraph, loadingData, idTS;
+	var autoMap = true;
+	
 	var form1 = document.getElementById('choice1');
 	var form2 = document.getElementById('choice2');
 	var form3_1 = document.getElementById('choice3_1');
@@ -31,12 +34,9 @@
 	parser[2] = parseTime;
 	parser[3] = parseTime2;
 
-	showOptions = function(){
-		d3.select("#options").transition().duration(1000).style("right",d3.select("#options").style("width"));
-	}
-	
-	hideOptions = function(){
-		d3.select("#options").transition().duration(1000).style("right","0px");
+	switchOptions = function(){
+		options = !options;
+		d3.select("#options").transition().duration(500).style("right",(options)?d3.select("#options").style("width"):"0px");
 	}
 	
 	var loadForm1 = function(){
@@ -72,10 +72,10 @@
 				.text(d.sensorId);
 			});
 			
-			//Create Map markers if there is
+			//Create Map markers if this is possible
 			clearMap();
-			if(createMarkers())
-				switchLayer("map");
+			if(createMarkers() && autoMap)
+				switchLayer("map"); // Switch to map if there is something to display and user wants to
 			// Triggering of loadData not to have an empty graph
 			loadData(true);
 		});
@@ -118,9 +118,11 @@
 		d3.selectAll("#choice3_1 option").remove();
 		d3.selectAll("#choice3_2 option").remove();
 		d3.selectAll("#choice3_3 option").remove();
+		d3.select("#textInfo").style("display","block");
 		
 		//Add new options
 		var choice3 = d3.selectAll("#choice3_1, #choice3_2 ,#choice3_3");
+		var  j = 2;
 		
 		choice3.append("option").text("None");
 		data.sensorRecords[0].sensorObject.forEach(function(d) {
@@ -128,14 +130,17 @@
 				choice3.append("option")
 				   .text(d.fieldName);
 				if(d.fieldName == "TimeStamp")
-					d3.select("#choice3_3 option:last-child").attr("selected","selected");
+					idTS = j;
+				j++;
 			}
 			else if(!floatValuesOnly){
 				choice3.append("option")
 				   .text(d.fieldName);
+				j++;
 			}
-			createProperty(findIndexOfName("TimeStamp"),parseDate,"x");
 		});
+		d3.select("#choice3_3 option:nth-child(" + idTS + ")").attr("selected","selected");
+		createProperty(findIndexOfName("TimeStamp"),parseDate,"x");
 	}
 	
 	var createProperty = function(id,p,prop){
@@ -149,7 +154,13 @@
 				console.log("Suppression : " + i);
 				data.sensorRecords.splice(i,1);
 				}
-		});	
+		});
+		
+		if(prop == "x"){
+			data.sensorRecords.sort(function(a, b) {
+				return a.x - b.x;
+			});
+		}
 	}
 	
 	var createAllProperties = function(){
@@ -163,9 +174,6 @@
 		id = findIndexOfID(form3_3.selectedIndex);
 		p = findParser(id);
 		createProperty(id,p,"x");
-		data.sensorRecords.sort(function(a, b) {
-			return a.x - b.x;
-		});
 	}
 	
 	//We got the name => we want the id in the data array...
@@ -250,9 +258,6 @@
 			var id = findIndexOfID(form3_3.selectedIndex);
 			var p = findParser(id);
 			createProperty(id,p,"x");
-			data.sensorRecords.sort(function(a, b) {
-				return a.x - b.x;
-			}); 
 			launchGraph();
 			}, true);
 		
@@ -262,6 +267,26 @@
 		floatOnly.addEventListener('change', function() {
 		    floatValuesOnly = floatOnly.checked;
 			loadData(true);
+		}, true);
+		
+		// Listen to the 'Display map on form1 change if there is something to display' checkbox
+		
+		var checkBoxAutoMap = document.getElementById('autoMap');
+		checkBoxAutoMap.addEventListener('change', function() {
+		    autoMap = checkBoxAutoMap.checked;
+		}, true);
+		
+		// Listen to the 'Is defalt x axis the time ?' checkbox
+		
+		var xAxisTimeStamp = document.getElementById('timestamp');
+		xAxisTimeStamp.addEventListener('change', function() {
+		    if(xAxisTimeStamp.checked){
+				document.getElementById('choiceX').style.display = "none";
+				d3.select("#choice3_3 option:nth-child(" + idTS + ")").attr("selected","selected");
+				createProperty(findIndexOfName("TimeStamp"),parseDate,"x");
+			}
+			else
+				document.getElementById('choiceX').style.display = "inline-block";
 		}, true);
 		
 		//Listen to number of measurements input

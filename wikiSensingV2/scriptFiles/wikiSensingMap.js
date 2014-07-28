@@ -5,11 +5,11 @@
 	var geocoder = new google.maps.Geocoder();
 	
 	createMap = function(){
-		var initCenter = new google.maps.LatLng(51.511494, -0.12188);
+		var initCenter = new google.maps.LatLng(55.623164, -3.113734);
 		
 		var options = {
 			center: initCenter,
-			zoom: 6,
+			zoom: 5,
 			mapTypeId: google.maps.MapTypeId.ROADMAP
 		};
 		

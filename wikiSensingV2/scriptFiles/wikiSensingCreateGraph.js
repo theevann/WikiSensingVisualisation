@@ -12,6 +12,7 @@
 		graphWidth = parseInt(0.85*width);
 		var x, y1, y2, y1Axis, y2Axis;
 		
+		d3.select("#textInfo").style("display","none");
 		d3.selectAll("svg").remove();
 		svg = d3.select("#chart").append("svg")
 			.attr("width", width)

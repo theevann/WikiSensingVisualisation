@@ -10,6 +10,14 @@
   shape-rendering: crispEdges;
 }
 
+h2{
+	text-align: center;
+}
+
+.opt{
+	font-weight:bold;
+}
+
 #header
 {
 	position:relative;
@@ -43,6 +51,7 @@
 #in-options{
 	padding: 1em 1em;
 }
+
 #options{
 		display: inline-block;
 		position: relative;
@@ -72,6 +81,12 @@
 #info{
 	margin: 0% 1%;
 	width : 8%;
+}
+
+#in-info{
+	width : 99%;
+	height: 98%;
+	border: 1px solid black;
 	border-radius: 10px;
 	box-shadow: 3px 3px 6px 0 #A9A9A9;
 	padding: 0.2em 0em;
@@ -84,6 +99,11 @@
 #chart{
 	width : 50%;
 }
+
+#choiceX{
+	display:none;
+}
+
 /*
 #mover:hover{
 	margin-left:0;
