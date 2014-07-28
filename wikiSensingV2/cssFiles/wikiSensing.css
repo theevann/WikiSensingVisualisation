@@ -26,8 +26,36 @@
 	margin-bottom: 2em;
 }
 
-#container{
+#container-1, #container-2, #container-3{
 	overflow : hidden;
+}
+
+#container-2{
+	display: inline-block;
+}
+
+#container-3{
+	display: inline-block;
+	float:left;
+	z-index: 1;
+}
+
+#in-options{
+	padding: 1em 1em;
+}
+#options{
+		display: inline-block;
+		position: relative;
+		right: 0px;
+		background-color: black;
+		z-index: 10;
+		opacity: 0.85;
+		height: 100%;
+		float:left;
+		color: white;
+		border-top-left-radius: 10px;
+		border-bottom-left-radius: 10px;
+		box-shadow: 3px 3px 6px 0 #A9A9A9;
 }
 
 #mover{
@@ -39,7 +67,6 @@
 #map, #chart, #info{
 	height: 100%;
 	float: left;
-	display: inline-block;
 }
 
 #info{

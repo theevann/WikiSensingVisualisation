@@ -37,22 +37,32 @@
 		<label for="measurements">Measurements :</label> 
 		<input type="number" step="1" value="1000" min="10" max="100000" id="measurements"> <!-- ms / frame -->
 		<span id ="numberLoaded"></span>
-		<strong>Graph Style :</strong>
-		<label for="r1">Curve</label> 
-		<INPUT id="r1" type= "radio" name="styleGraph" value="basis" checked>
-		<label for="r2">Line</label> 
-		<INPUT id="r2" type= "radio" name="styleGraph" value="linear">
-		<label for="r3">Points</label> 		
-		<INPUT id="r3" type= "radio" name="styleGraph" value="point"> 
+		
 		<!-- -->
 		<button id = "switch" type='button' style="width:60px" onclick="switchLayer()">Switch</button>
 		<!---->
 	</FORM>
-	<div id="container">
-		<div id="mover">
-			<div id="map"></div>
-			<div id="info"></div>
-			<div id="chart"></div>
+	
+	<div id="container-1">
+		<div id="container-2">
+			<div id="container-3">
+				<div id="mover">
+					<div id="map"></div>
+					<div id="info"></div>
+					<div id="chart"></div>
+				</div>
+			</div>
+			<div id="options">
+				<div id="in-options">
+					<strong>Graph Style :</strong>
+					<label for="r1">Curve</label> 
+					<INPUT id="r1" type= "radio" name="styleGraph" value="basis" checked>
+					<label for="r2">Line</label> 
+					<INPUT id="r2" type= "radio" name="styleGraph" value="linear">
+					<label for="r3">Points</label> 		
+					<INPUT id="r3" type= "radio" name="styleGraph" value="point"> 
+				</div>
+			</div>
 		</div>
 	</div>
 </body>

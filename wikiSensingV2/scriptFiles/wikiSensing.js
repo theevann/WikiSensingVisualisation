@@ -31,6 +31,14 @@
 	parser[2] = parseTime;
 	parser[3] = parseTime2;
 
+	showOptions = function(){
+		d3.select("#options").transition().duration(1000).style("right",d3.select("#options").style("width"));
+	}
+	
+	hideOptions = function(){
+		d3.select("#options").transition().duration(1000).style("right","0px");
+	}
+	
 	var loadForm1 = function(){
 		d3.json("http://wikisensing.org/WikiSensingServiceAPI/", function(error, json) {
 			if (error) return console.warn(error);
@@ -119,11 +127,14 @@
 			if(!isNaN(parseFloat(d.value))){
 				choice3.append("option")
 				   .text(d.fieldName);
+				if(d.fieldName == "TimeStamp")
+					d3.select("#choice3_3 option:last-child").attr("selected","selected");
 			}
 			else if(!floatValuesOnly){
 				choice3.append("option")
 				   .text(d.fieldName);
 			}
+			createProperty(findIndexOfName("TimeStamp"),parseDate,"x");
 		});
 	}
 	
@@ -290,9 +301,14 @@
 		
 		//Set size of the containing div
 		
-		var container = d3.select('#container');
+		var container1 = d3.selectAll('#container-1');
+		var container2 = d3.selectAll('#container-2');
+		var container3 = d3.selectAll('#container-3');
+		var containers = d3.selectAll('#container-1, #container-2, #container-3');
+		var options = d3.select('#options');
+		
 		(function(){
-			var e = document.getElementById('container');
+			var e = document.getElementById('container-1');
 			var offset = 0;
 			while (e)
 			{
@@ -300,8 +316,12 @@
 				e = e.offsetParent;
 			}
 			heightSVG = (0.95*(H-offset));
-			container.style("height", heightSVG + "px")
-					.style("width","100%");
+			containers.style("height", heightSVG + "px")
+			container1.style("width","100%");
+			container2.style("width","120%");
+			container3.style("width",container1.style("width"));
+			options.style("width",parseInt(container1.style("width"))*0.2+"px");
+
 		})();
 		
 		// Pour l'instant on créé la map ici ...

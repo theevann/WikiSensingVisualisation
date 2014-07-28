@@ -46,7 +46,8 @@
 			return true;
 		}
 		else if(nameForm1 == "Public_Full_TFL_Tube" ){
-				putMarkers();
+				//Don't work that well
+				//putMarkers();
 			return true;
 		}
 		return false;
@@ -75,11 +76,21 @@
 		d3.select("#mover").transition().style("margin-left",margin).ease("linear").duration(250);
 	}
 	
-	var putMarkers = function () {
+	var putMarkers;
+	(function(){
 		var position = [];
 		var infowindow = new google.maps.InfoWindow();
-		dataForm2.sensor.forEach(function(d,i){
-		var address = d.sensorObject[3].value + " London";
+		
+		putMarkers = function () {
+			position = [];
+			dataForm2.sensor.forEach(function(d,i){
+					setTimeout((function(d,i){return function(){timeDelayGeocode(d,i);};})(d,i), i*600);
+			});
+		}
+		
+		var timeDelayGeocode = function(d,i){
+			console.log(i)
+			var address = d.sensorObject[3].value + " London";
 			geocoder.geocode( { 'address': address}, function(results, status) {
 				if (status == google.maps.GeocoderStatus.OK) {
 					position[0] = results[0].geometry.location.lat();
@@ -111,8 +122,7 @@
 					console.log("Le geocodage n\'a pu etre effectue pour la raison suivante: " + status);
 				}
 			});
-		});
-	}
+		}
+	})();
 	
-
 })();
