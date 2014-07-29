@@ -47,6 +47,7 @@
 			.append("li")
 			.text(d.fieldName + " : " + d.value);
 		});
+		d3.select("#bPlot").attr("value",id);
 	}
 	
 	var loadForm1 = function(){
@@ -87,9 +88,12 @@
 			
 			//Create Map markers if this is possible
 			clearMap();
-			if(createMarkers() && autoMap)
-				switchLayer("map"); // Switch to map if there is something to display and user wants to
-				
+			if(createMarkers()){
+				if(autoMap) switchLayer("map"); // Switch to map if there is something to display and user wants to
+			}
+			else{
+			
+			}
 			// Triggering of loadData not to have an empty graph
 			loadData(true);
 		});
@@ -193,7 +197,7 @@
 	//We got the name => we want the id in the data array...
 	
 	var findIndexOfName = function(name){
-		var idT = 0;
+		var idT = -1;
 		data.sensorRecords[0].sensorObject.forEach(function(d,i) {
 				if(d.fieldName == name)
 					idT = i;
@@ -357,11 +361,49 @@
 			switchLayer();
 		}, true);
 		
+		//Show button
+		
+		var showButton = document.getElementById('bShow');
+		showButton.addEventListener('click', function() {
+			var placeFields = ["Description"];
+			var id = plotButton.value, idx = -1;
+			var field;
+			
+			if(getMarkersDisplayed()){
+				animateSensor(id);
+				return;
+			}
+			
+			idx = findIndexOfName("coordinatesLL");
+			if(idx != -1){
+				clearMap();
+				showSensor(data.sensorRecords[0].sensorObject[idx].value.split(",").reverse(), id);
+				return;
+			}	
+			
+			for(var i = 0 ; i < dataForm2.sensor[id].sensorObject.length ; i++){
+				field = dataForm2.sensor[id].sensorObject[i].fieldName;
+				if(placeFields.indexOf(field) != -1){
+					idx = i;
+				}
+			}
+			
+			if(idx != -1){
+				clearMap();
+				showSensor(dataForm2.sensor[id].sensorObject[idx].value + " , London, United Kingdom", id);
+				return;
+			}
+			
+			d3.select("#bShow").text("No location available");
+			setTimeout(function(){d3.select("#bShow").text("Show on map");}, 2000);
+				
+		}, true);
+		
 		// To create graphs
 		
 		launchGraph = function() {
-			var id1 = findIndexOfID(form3_1.selectedIndex)
-			var id2 = findIndexOfID(form3_2.selectedIndex)
+			var id1 = findIndexOfID(form3_1.selectedIndex);
+			var id2 = findIndexOfID(form3_2.selectedIndex);
 			var id3 = findIndexOfID(form3_3.selectedIndex);
 			var p1 = findParser(id1);
 			var p2 = findParser(id2);
@@ -397,7 +439,7 @@
 
 		})();
 		
-		// Pour l'instant on créé la map ici ...
+		//Creating map	
 		createMap();
 		
 		//Initial loading of form 1

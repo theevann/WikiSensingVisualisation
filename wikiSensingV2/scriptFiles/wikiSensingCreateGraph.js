@@ -167,8 +167,8 @@
 		else{ // If it's a string ...
 			var yDomain = new Array(); 
 			data.sensorRecords.forEach(function(d,i) {
-				if(yDomain.indexOf(d.prop) == -1)
-					yDomain.push(d.prop);
+				if(yDomain.indexOf(d[prop]) == -1)
+					yDomain.push(d[prop]);
 			});
 			
 			y = d3.scale.ordinal()

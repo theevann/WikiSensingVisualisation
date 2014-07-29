@@ -5,7 +5,7 @@
 	<title>WikiSensing Data Visualisation</title>
 	<script src="http://d3js.org/d3.v3.min.js"></script>
 	<script src="scriptFiles\d3-transform.js"></script>
-	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false&libraries=places"></script>
 	<link rel="stylesheet" type="text/css" href="../cssFiles/common.css" />
 	<link rel="stylesheet" type="text/css" href="cssFiles/wikiSensing.css" />
 </head>
@@ -46,10 +46,12 @@
 		<div id="container-2">
 			<div id="container-3">
 				<div id="mover">
+					<input id="pac-input" class="controls" type="text" placeholder="Search Box">
 					<div id="map"></div>
 					<div id="info"><div id="in-info">
 					<h2>Sensor Information</h2>
 					<ul></ul>
+					<button id = "bShow" type='button' style="" value="0" >Show on map</button>
 					<button id = "bPlot" type='button' style="" value="0" >Plot</button>
 					</div></div>
 					<div id="chart"><p id = "textInfo" style="text-align:center;">Choose a property to display ...</p></div>
@@ -61,41 +63,41 @@
 					<h2>Options</h2>
 					<ul>
 					<li>
-					<p class="opt">Graph Style :</p>
-					<p>
-					<label for="r1">Curve</label> 
-					<INPUT id="r1" type= "radio" name="styleGraph" value="basis" checked>
-					<label for="r2">Line</label> 
-					<INPUT id="r2" type= "radio" name="styleGraph" value="linear">
-					<label for="r3">Points</label> 		
-					<INPUT id="r3" type= "radio" name="styleGraph" value="point">
-					</p>
+						<p class="opt">Graph Style :</p>
+						<p>
+						<label for="r1">Curve</label> 
+						<INPUT id="r1" type= "radio" name="styleGraph" value="basis" checked>
+						<label for="r2">Line</label> 
+						<INPUT id="r2" type= "radio" name="styleGraph" value="linear">
+						<label for="r3">Points</label> 		
+						<INPUT id="r3" type= "radio" name="styleGraph" value="point">
+						</p>
 					</li>
 					<li>
-					<p>
-					<label for="measurements" class="opt">Number of measurements :</label>
-					</p>
-					<p>
-					<input type="number" step="1" value="1000" min="10" max="100000" id="measurements">
-					<span id ="numberLoaded"></span>
-					</p>
+						<p>
+						<label for="measurements" class="opt">Number of measurements :</label>
+						</p>
+						<p>
+						<input type="number" step="1" value="1000" min="10" max="100000" id="measurements">
+						<span id ="numberLoaded"></span>
+						</p>
 					</li>
 					<li>
-					<p>
-					<label for="timestamp" class="opt">Use timestamp on X axis :</label> 
-					<input type="checkbox" id="timestamp" checked="checked">
-					<p>
+						<p>
+						<label for="timestamp" class="opt">Use timestamp on X axis :</label> 
+						<input type="checkbox" id="timestamp" checked="checked">
+						<p>
 					</li>
 					<li>
-					<p>
-					<label for="floatOnly" class="opt">Display only 'float fields' :</label> 
-					<INPUT id = "floatOnly" type="checkbox" name="floatOnly" checked>
-					</p>
+						<p>
+						<label for="floatOnly" class="opt">Display only 'float fields' :</label> 
+						<INPUT id = "floatOnly" type="checkbox" name="floatOnly" checked>
+						</p>
 					<li>
-					<p>
-					<label for="autoMap" class="opt">Automatically switch to map :</label> 
-					<INPUT id = "autoMap" type="checkbox" name="autoMap" checked>
-					</p>
+						<p>
+						<label for="autoMap" class="opt">Automatically switch to map :</label> 
+						<INPUT id = "autoMap" type="checkbox" name="autoMap" checked>
+						</p>
 					</li>
 					</ul>
 				</div>
