@@ -5,7 +5,13 @@
 	var markersSensor = new Array();
 	var geocoder = new google.maps.Geocoder();
 	var infowindow = new google.maps.InfoWindow();
-	
+	var pinIcon = new google.maps.MarkerImage(
+		"http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|F0FF00",
+		null, /* size is determined at runtime */
+		null, /* origin is 0,0 */
+		null, /* anchor is bottom center of the scaled image */
+		new google.maps.Size(14, 22)
+	);
 	createMap = function(){
 		var initCenter = new google.maps.LatLng(55.623164, -3.113734);
 		
@@ -38,7 +44,7 @@
 			  bounds.extend(place.geometry.location);
 			}
 
-			//sensorMap.fitBounds(bounds);
+			sensorMap.fitBounds(bounds);
 		  });
 		/**/
 	}
@@ -50,7 +56,8 @@
 			dataForm2.sensor.forEach(function(d,i){
 				var marker = new google.maps.Marker({
 					position: new google.maps.LatLng(d.sensorObject[3].value, d.sensorObject[4].value),
-					map: sensorMap
+					map: sensorMap,
+					icon: pinIcon
 				})
 				google.maps.event.addListener(marker, 'dblclick', function(event) {
 					document.getElementById('choice2').selectedIndex = i;

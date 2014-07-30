@@ -2,11 +2,21 @@
 	
 	var svg;
 	var width, height, graphHeight, graphWidth;
+	var tooltip = d3.select("body")
+	.append("div")
+	.style("position", "absolute")
+	.style("z-index", "10")
+	.style("background-color", "white")
+	.style("opacity", 0.9)
+	.style("visibility", "hidden")
+	.text("a simple tooltip");
 	
 	createGraph = function(p1, p2, p, typeY1, typeY2, typeX, wdth, hgt, typeGraph){
 		
-		width = wdth;
-		height = hgt;
+		//width = wdth;
+		//height = hgt;
+		width = parseFloat(d3.select("#chart").style("width"));
+		height = parseFloat(d3.select("#chart").style("height"));
 		
 		graphHeight = parseInt(0.95*height);
 		graphWidth = parseInt(0.85*width);
@@ -96,6 +106,10 @@
 			  .style("stroke", "#ff7f0e")
 			  .text(data.sensorRecords[0].sensorObject[p2].fieldName);		
 		}
+		
+		d3.selectAll(".axis text").on("mouseover", function(d){tooltip.text(d);return tooltip.style("visibility", "visible");})
+		.on("mousemove", function(){return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
+		.on("mouseout", function(){return tooltip.style("visibility", "hidden");});
 		
 		var line = new Array();
 		 

@@ -12,7 +12,7 @@
 		H = w.innerHeight|| e.clientHeight|| g.clientHeight;
 		console.log(W + " " + H)
 		
-	var widthSVG = W,
+	var widthSVG = W;
 		heightSVG = H;
 	
 	var numMes, typeGraph, loadingData, idTS;
@@ -309,6 +309,7 @@
 		var floatOnly = document.getElementById('floatOnly');
 		floatOnly.addEventListener('change', function() {
 		    floatValuesOnly = floatOnly.checked;
+			d3.select("svg").remove();
 			loadData(true);
 		}, true);
 		
