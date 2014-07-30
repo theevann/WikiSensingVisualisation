@@ -176,20 +176,25 @@
 			}
 		});
 		d3.select("#choice3_3 option:nth-child(" + idTS + ")").attr("selected","selected");
-		createProperty(findIndexOfName("TimeStamp"),parseDate,"x");
+		createProperty(findIndexOfName("TimeStamp"),"TimeStamp",parseDate,"x");
 	}
 	
-	var createProperty = function(id,p,prop){
-		if(id == -1)
+	var createProperty = function(arrayID,fieldName,p,prop){
+		if(arrayID == -1) // If property doesn't exist
 			return;
 		
+		var id;
 		data.sensorRecords.forEach(function(d,i) {
-			if(d.sensorObject[id]) //If value exists
-				d[prop] = (p != null)?p(d.sensorObject[id].value):d.sensorObject[id].value;
+			if(d.sensorObject[arrayID] && d.sensorObject[arrayID].fieldName == fieldName){ //If value exists && If the value of the fieldName is the same as the one in the form (should be but double check because some fields are not present on all records and some ids may consequently not correspond)
+				d[prop] = (p != null)?p(d.sensorObject[arrayID].value):d.sensorObject[arrayID].value; //Find the value, parse it and create the variable.
+			}
+			else if((id = findIndexOfNameIn(fieldName,i)) != -1 ){
+				d[prop] = (p != null)?p(d.sensorObject[id].value):d.sensorObject[id].value; //Find the value, parse it and create the variable.
+			}
 			else{ // Otherwise we delete the entry
 				console.log("Suppression : " + i);
 				data.sensorRecords.splice(i,1);
-				}
+			}
 		});
 		
 		if(prop == "x"){
@@ -200,35 +205,53 @@
 	}
 	
 	var createAllProperties = function(){
-		var id, p;
-		id = findIndexOfID(form3_1.selectedIndex);
-		p = findParser(id);
-		createProperty(id,p,"prop1");
-		id = findIndexOfID(form3_2.selectedIndex);
-		p = findParser(id);
-		createProperty(id,p,"prop2");
-		id = findIndexOfID(form3_3.selectedIndex);
-		p = findParser(id);
-		createProperty(id,p,"x");
+		var arrayID, p, formID;
+		
+		formID = form3_1.selectedIndex;
+		arrayID = findIndexOfID(formID);
+		p = findParser(arrayID);
+		createProperty(arrayID,form3_1.options[formID].value,p,"prop1");
+		
+		formID = form3_2.selectedIndex;
+		arrayID = findIndexOfID(formID);
+		p = findParser(arrayID);
+		createProperty(arrayID,form3_1.options[formID].value,p,"prop2");
+		
+		formID = form3_3.selectedIndex;
+		arrayID = findIndexOfID(formID);
+		p = findParser(arrayID);
+		createProperty(arrayID,form3_1.options[formID].value,p,"x");
 	}
 	
-	//We got the name => we want the id in the data array...
+	//We got the name => we want the id in the data array... (for the first record)
 	
 	var findIndexOfName = function(name){
+		return findIndexOfNameIn(name,0);
+	}
+	
+	//We got the name => we want the id in the data array... (for the record number 'record')
+	
+	var findIndexOfNameIn = function(name, record){
 		var idT = -1;
-		data.sensorRecords[0].sensorObject.forEach(function(d,i) {
+		data.sensorRecords[record].sensorObject.forEach(function(d,i) {
 				if(d.fieldName == name)
 					idT = i;
 		});
 		return idT;
 	}
 	
-	//We got the id in the form => we want the id in the data array...
+	//We got the id in the form => we want the id in the data array... (for the first record)
 	
 	var findIndexOfID = function(id){
+		return findIndexOfIDIn(id, 0);
+	}
+	
+	//We got the id in the form => we want the id in the data array... (for the record number 'record')
+	
+	var findIndexOfIDIn = function(id, record){
 		var name = form3_1.options[id].value;
 		var idT = -1;
-		data.sensorRecords[0].sensorObject.forEach(function(d,i) {
+		data.sensorRecords[record].sensorObject.forEach(function(d,i) {
 				if(d.fieldName == name)
 					idT = i;
 		});
@@ -300,23 +323,26 @@
 		
 		//Listen to forms 3
 		form3_1.addEventListener('change', function() {
-			var id = findIndexOfID(form3_1.selectedIndex);
-			var p = findParser(id);
-			createProperty(id,p,"prop1");
+			var formID = form3_1.selectedIndex;
+			var arrayID = findIndexOfID(formID);
+			var p = findParser(arrayID);
+			createProperty(arrayID,form3_1.options[formID].value,p,"prop1");
 			launchGraph();
 		}, true);
 		
 		form3_2.addEventListener('change', function() {
-			var id = findIndexOfID(form3_2.selectedIndex);
-			var p = findParser(id);
-			createProperty(id,p,"prop2");
+			var formID = form3_2.selectedIndex;
+			var arrayID = findIndexOfID(formID);
+			var p = findParser(arrayID);
+			createProperty(arrayID,form3_1.options[formID].value,p,"prop2");
 			launchGraph();
 		}, true);
 		
 		form3_3.addEventListener('change', function() {
-			var id = findIndexOfID(form3_3.selectedIndex);
-			var p = findParser(id);
-			createProperty(id,p,"x");
+			var formID = form3_3.selectedIndex;
+			var arrayID = findIndexOfID(formID);
+			var p = findParser(arrayID);
+			createProperty(arrayID,form3_1.options[formID].value,p,"x");
 			launchGraph();
 			}, true);
 		
@@ -343,7 +369,7 @@
 		    if(xAxisTimeStamp.checked){
 				document.getElementById('choiceX').style.display = "none";
 				d3.select("#choice3_3 option:nth-child(" + idTS + ")").attr("selected","selected");
-				createProperty(findIndexOfName("TimeStamp"),parseDate,"x");
+				createProperty(findIndexOfName("TimeStamp"),"TimeStamp",parseDate,"x");
 			}
 			else
 				document.getElementById('choiceX').style.display = "inline-block";
