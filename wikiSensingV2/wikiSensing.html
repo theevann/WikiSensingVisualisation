@@ -20,26 +20,26 @@
 		<label for="choice1">Service Key :</label>
 		<SELECT id="choice1" size="1">
 		</SELECT>
+		
 		<label for="choice2">Sensor Id :</label>
 		<SELECT id="choice2" size="1">
 		</SELECT>
+		
 		<label for="choice3_1">Property 1:</label>
 		<SELECT id="choice3_1" size="1" style="background:#1f77b4;">
 		</SELECT>
+		
 		<label for="choice3_2">Property 2:</label>
 		<SELECT id="choice3_2" size="1" style="background:#ff7f0e;">
 		</SELECT>
+		
 		<span id = "choiceX">
 		<label for="choice3_3">X axis :</label>
 		<SELECT id="choice3_3" size="1">
 		</SELECT>
-		</span>
+		</span>	
 		
-		<!-- -->
 		<button id = "switch" type='button' style="/*width:60px;*/" onclick="switchLayer()">Map / Graph</button>
-		<!-- 
-		<button id = "switch" type='button' style="width:60px;float:right;" onclick="switchOptions()" >Options</button>
-		<!---->
 	</FORM>
 	
 	<div id="container-1">
@@ -97,6 +97,12 @@
 						<p>
 						<label for="autoMap" class="opt">Automatically switch to map :</label> 
 						<INPUT id = "autoMap" type="checkbox" name="autoMap" checked>
+						</p>
+					</li>
+					<li>
+						<p>
+						<label for="graphicConf" class="opt">Show map and graph on the same page :</label> 
+						<INPUT id = "graphicConf" type="checkbox" name="graphicConf">
 						</p>
 					</li>
 					</ul>

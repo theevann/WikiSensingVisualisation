@@ -1,6 +1,5 @@
 ﻿(function(){
 	var markersDisplayed = false;
-	var mapDisplayed = false;
 	var carte = null;
 	var markersSensor = new Array();
 	var geocoder = new google.maps.Geocoder();
@@ -118,22 +117,6 @@
 		}
 		markersSensor = [];
 		markersDisplayed = false;
-	}
-	
-	switchLayer = function(layer){
-		var margin;
-		if(layer == "map"){
-			margin = "0px";
-			mapDisplayed = true;
-		}
-		else if(layer == "graph"){
-			margin = "-100%";
-			mapDisplayed = true;
-		}
-		else
-			margin = (mapDisplayed = !mapDisplayed)?"0px":"-100%";
-			
-		d3.select("#mover").transition().style("margin-left",margin).ease("linear").duration(250);
 	}
 	
 	getMarkersDisplayed = function(){return markersDisplayed};

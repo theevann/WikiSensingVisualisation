@@ -11,12 +11,10 @@
 	.style("visibility", "hidden")
 	.text("a simple tooltip");
 	
-	createGraph = function(p1, p2, p, typeY1, typeY2, typeX, wdth, hgt, typeGraph){
+	createGraph = function(p1, p2, p, typeY1, typeY2, typeX, typeGraph, wdth, hgt){
 		
-		//width = wdth;
-		//height = hgt;
-		width = parseFloat(d3.select("#chart").style("width"));
-		height = parseFloat(d3.select("#chart").style("height"));
+		width = wdth | parseFloat(d3.select("#chart").style("width"));
+		height = hgt| parseFloat(d3.select("#chart").style("height"));
 		
 		graphHeight = parseInt(0.95*height);
 		graphWidth = parseInt(0.85*width);

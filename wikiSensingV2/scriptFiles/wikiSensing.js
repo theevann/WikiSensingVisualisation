@@ -12,11 +12,11 @@
 		H = w.innerHeight|| e.clientHeight|| g.clientHeight;
 		console.log(W + " " + H)
 		
-	var widthSVG = W;
+	var widthSVG = W,
 		heightSVG = H;
 	
 	var numMes, typeGraph, loadingData, idTS;
-	var autoMap = true;
+	var autoMap = true, mapDisplayed = true;
 	
 	var form1 = document.getElementById('choice1');
 	var form2 = document.getElementById('choice2');
@@ -36,7 +36,8 @@
 
 	switchOptions = function(){
 		options = !options;
-		d3.select("#options").transition().duration(500).style("right",(options)?d3.select("#options").style("width"):"0px");
+		d3.select("#options").transition().duration(400).style("right",(options)?d3.select("#options").style("width"):"0px");
+		d3.select("#bOption").text((options)?"X":"O");
 	}
 	
 	showInfos = function(id){
@@ -48,6 +49,26 @@
 			.text(d.fieldName + " : " + d.value);
 		});
 		d3.select("#bPlot").attr("value",id);
+	}
+	
+	switchLayer = function(layer){
+		if(document.getElementById('graphicConf').checked && mapDisplayed)
+			return; // If all is shown on the same page, then we do not need to handle the arrows
+	
+		var margin;
+		if(layer == "map" && !mapDisplayed){
+			margin = "0px";
+			mapDisplayed = true;
+		}
+		else if(layer == "graph" && mapDisplayed){
+			margin = "-100%";
+			mapDisplayed = false;
+		}
+		else if(!layer){
+			margin = (mapDisplayed = !mapDisplayed)?"0px":"-100%";
+		}
+		
+		d3.select("#mover").transition().style("margin-left",margin).ease("linear").duration(250);
 	}
 	
 	var loadForm1 = function(){
@@ -88,11 +109,8 @@
 			
 			//Create Map markers if this is possible
 			clearMap();
-			if(createMarkers()){
-				if(autoMap) switchLayer("map"); // Switch to map if there is something to display and user wants to
-			}
-			else{
-			
+			if(createMarkers() && autoMap){
+				switchLayer("map"); // Switch to map if there is something to display and user wants to switch automatically (default: yes)
 			}
 			// Triggering of loadData not to have an empty graph
 			loadData(true);
@@ -236,12 +254,10 @@
 		return p;
 	}
 	
-	// Handling arrows
-	
+	// Handling arrows	
 	
 	
 	applyKey = function (_event_){
-	
 		// --- Retrieve event object from current web explorer
 		var winObj = window.event || _event_;
 		var intKeyCode = winObj.keyCode;
@@ -333,6 +349,26 @@
 				document.getElementById('choiceX').style.display = "inline-block";
 		}, true);
 		
+		// Listen to the 'graphical configuration' checkbox
+		
+		var graphicConf = document.getElementById('graphicConf');
+		graphicConf.addEventListener('change', function() {
+		    if(graphicConf.checked){
+				d3.select("#mover").style("width","100%");
+				d3.select("#map").style("width","33%");
+				d3.select("#info").style("width","15%");
+				d3.select("#switch").attr("disabled","disabled");
+				switchLayer("map");
+			}
+			else{
+				d3.select("#mover").style("width","200%");
+				d3.select("#map").style("width","40%");
+				d3.select("#info").style("width","8%");
+				d3.select("#switch").attr("disabled",null);
+			}
+			launchGraph();
+		}, true);
+		
 		//Listen to number of measurements input
 		
 		var mesInput = document.getElementById('measurements');
@@ -412,7 +448,7 @@
 			var typeY1 = (p1 == null)?2:((p1 == parseFloat)?1:0); 
 			var typeY2 = (p2 == null)?2:((p2 == parseFloat)?1:0); 
 			var typeX = (p == null)?2:((p == parseFloat)?1:0); 
-			createGraph(id1, id2, id3, typeY1, typeY2, typeX, widthSVG, heightSVG , typeGraph);
+			createGraph(id1, id2, id3, typeY1, typeY2, typeX, typeGraph);
 		}
 		
 		//Set size of the containing div
