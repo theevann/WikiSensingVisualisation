@@ -188,7 +188,7 @@
 			if(d.sensorObject[arrayID] && d.sensorObject[arrayID].fieldName == fieldName){ //If value exists && If the value of the fieldName is the same as the one in the form (should be but double check because some fields are not present on all records and some ids may consequently not correspond)
 				d[prop] = (p != null)?p(d.sensorObject[arrayID].value):d.sensorObject[arrayID].value; //Find the value, parse it and create the variable.
 			}
-			else if((id = findIndexOfNameIn(fieldName,i)) != -1 ){
+			else if((id = findIndexOfNameIn(fieldName,i)) != -1 ){ // else, if the fieldName exist in the records (which mean an other field before may not exist in this record), we take the id
 				d[prop] = (p != null)?p(d.sensorObject[id].value):d.sensorObject[id].value; //Find the value, parse it and create the variable.
 			}
 			else{ // Otherwise we delete the entry
