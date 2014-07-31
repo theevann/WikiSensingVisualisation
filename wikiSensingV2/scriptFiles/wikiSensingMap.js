@@ -153,7 +153,8 @@
 	var createMarker = function(address, position, index){		
 		var marker = new google.maps.Marker({
 			position: new google.maps.LatLng(position[0], position[1]),
-			map: sensorMap
+			map: sensorMap,
+			icon: pinIcon
 		})
 		
 		google.maps.event.addListener(marker, 'click', function(event) {
