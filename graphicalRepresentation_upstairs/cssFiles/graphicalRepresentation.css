@@ -1,0 +1,17 @@
+﻿#scale path,
+#scale line {
+  fill: none;
+  stroke: #000;
+  stroke-width: 1.5px;
+  shape-rendering: crispEdges;
+}
+
+#graph {
+	position:relative;
+}
+
+#date {
+    display : inline-block;
+    font-size : 16pt;
+    font-weight : bold;
+}

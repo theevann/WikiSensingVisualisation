@@ -10,18 +10,142 @@
   shape-rendering: crispEdges;
 }
 
+h2{
+	text-align: center;
+}
+
+.opt{
+	font-weight:bold;
+}
+
 #header
 {
-	position:relative;
-	text-align: center;
-	font-size: 2em;
-	background-color: #aec3fc;
-	border-radius: 10px;
-	box-shadow: 3px 3px 6px 0 #A9A9A9;
-	padding: 0.2em 0em;
-	margin-bottom: 0.5em;
+	/*margin-bottom: 0.5em;*/
 }
 
 #menu{
 	margin-bottom: 2em;
 }
+
+#container-1, #container-2, #container-3{
+	overflow : hidden;
+}
+
+#container-2{
+	display: inline-block;
+}
+
+#container-3{
+	display: inline-block;
+	float:left;
+	z-index: 1;
+}
+
+#in-options{
+	padding: 1em 1em;
+}
+
+#options{
+		display: inline-block;
+		position: relative;
+		right: 0px;
+		background-color: black;
+		z-index: 10;
+		opacity: 0.9;
+		height: 100%;
+		float:left;
+		color: white;
+		border-bottom-left-radius: 10px;
+		box-shadow: 3px 3px 6px 0 #A9A9A9;
+}
+
+#bOption{
+	position:absolute;
+	left:-1.4em;
+	width: 1.4em;
+	height: 1.2em;
+	text-align: center;
+	display: inline-block;
+	border-top-left-radius: 10px;
+	border-bottom-left-radius: 10px;
+	background-color: black;
+	font-size: 1.4em;
+	opacity: 0.5;
+	cursor: pointer;
+}
+
+#bOption:hover{
+	opacity : 1;
+}
+
+#mover{
+	width: 200%;
+	height: 100%;
+}
+
+#map, #chart, #info{
+	height: 100%;
+	float: left;
+}
+
+#info{
+	margin: 0% 1%;
+	width : 8%;
+}
+
+#in-info{
+	width : 99%;
+	height: 98%;
+	border: 1px solid black;
+	border-radius: 10px;
+	box-shadow: 3px 3px 6px 0 #A9A9A9;
+	padding: 0.2em 0em;
+	overflow: hidden;
+}
+
+#bPlot, #bShow{
+	width: 90%;
+	margin: auto;
+	height: 35px;
+	display: block;
+	margin-bottom: 10px;
+}
+
+#map{
+	width : 40%;
+}
+
+#chart{
+	width : 50%;
+}
+
+#choiceX{
+	display:none;
+}
+
+
+#pac-input {
+	background-color: #fff;
+	padding: 0 11px 0 13px;
+	width: 400px;
+	font-family: Roboto;
+	font-size: 15px;
+	font-weight: 300;
+	text-overflow: ellipsis;
+	margin-top: 16px;
+	margin-left: 16px;
+	border: 1px solid transparent;
+	border-radius: 2px 0 0 2px;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	height: 32px;
+	outline: none;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+  #pac-input:focus {
+	border-color: #4d90fe;
+	margin-left: -1px;
+	padding-left: 14px;  /* Regular padding-left + 1. */
+	width: 401px;
+  }

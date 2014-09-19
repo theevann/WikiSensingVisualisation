@@ -1,21 +1,34 @@
-﻿		
-	var data = new Array();
-	var bar = d3.select("#progBar");
-	var actualProp = 10;
+﻿var load, findId, findListId, applyKey, toggleSecret;
+var data = [];
 
-	var getFile = function(file) {
-	    d3.json("http://wikisensing.org/WikiSensingServiceAPI/DCESensorDeployment2f7M76vkKdRlvm7vVWg/Node_" + (file + 1), function (error, json) {
+(function () {
+	var actualProp = "temperature";
+	var propertiesShown = ['temperature', 'humidity', 'light1', 'light2', 'batteryVoltage'];
+
+	var numSensors;
+	var bar = d3.select("#progBar");
+	var toggled = false, doubleSpace = false;
+
+	load = function (serverAdress, num) {
+		numSensors = num;
+		bar.attr('max', numSensors);
+		getFile(serverAdress, 0);
+	};
+
+	var getFile = function (adress, file) {
+	    d3.json(adress + "Node_" + (file + 1), function (error, json) {
 	        if (error) {
 	            d3.select("#downloadProgress").text("Impossible to load data");
 	            return console.warn(error);
 	        }
-			// Save the json into the data 
+			
 	        data[file] = json;
-	        //Display loading of data
+	        
 	        bar.attr("value", file);
 			console.log("File : " + file);
-	        d3.select("#downloadProgress").text("Retrieving Data ... " + file + "/15");
-	        if (file == 14) {
+			d3.select("#downloadProgress").text("Retrieving Data ... " + (file + 1) + "/" + numSensors);
+	        
+	        if (file === (numSensors - 1)) {
 	            d3.select("#progress").style("display", "none");
 				//Initialise listeners and variables
 				initialise();
@@ -23,13 +36,13 @@
 				initTab2();
 				//Show first the 15 graphs
 	            createGraphs(actualProp);
-	        } else if (file < 14){
-	            getFile(file + 1);
+	        } else if (file < (numSensors - 1)) {
+	            getFile(adress, file + 1);
 			}
 	    });
-	}
+	};
 
-	var initialise = function() {	
+	var initialise = function () {
 		w = window;
 	    d = document;
 	    e = d.documentElement;
@@ -41,7 +54,7 @@
 	        outter: 100,
 	        inner: 50
 	    };
-		width = W;
+		width = 0.98*W;
 		height = (H - 2 * parseInt(window.getComputedStyle(document.querySelector('body')).marginTop) - parseInt(window.getComputedStyle(document.getElementById('header')).marginTop) - parseInt(window.getComputedStyle(document.getElementById('header')).marginBottom) - document.getElementById('header').getBoundingClientRect().height);
 
 		parseDate = d3.time.format("%Y-%m-%dT%H:%M:%SZ").parse,
@@ -55,18 +68,23 @@
 		formatDate = function (d) {
 			return formatValue(d);
 		};
-		
-		var createOption = function () {
-			data[0].sensorRecords[0].sensorObject.forEach(function (d) {
-				if (d.fieldName != "User" && d.fieldName != "Created")
+
+		var createOption = function (s) {
+			data[0].sensorRecords[0].sensorObject.forEach(function (d,j) {
+				var id = propertiesShown.indexOf(d.fieldName);
+				if (s || id >= 0) {
 					d3.selectAll("body form select")
-					.append("option")
-					.text(d.fieldName);
+						.append("option")
+						.text(d.fieldName)
+						.attr('value', d.fieldName);
+				}
 			});
-			d3.select("#Properties option:nth-child(" + (actualProp - 1) + ")").attr("selected", "selected");
+			d3.select("#Properties option:nth-child(" + (findListId(d3.select("#Properties").node(), actualProp) + 1) + ")").attr("selected", "selected");
+			d3.select("#PropertiesComp1 option:nth-child(" + (findListId(d3.select("#PropertiesComp1").node(), p1) + 1) + ")").attr("selected", "selected");
+			d3.select("#PropertiesComp2 option:nth-child(" + (findListId(d3.select("#PropertiesComp2").node(), p2) + 1) + ")").attr("selected", "selected");
 		};
-		createOption();
-		
+		createOption(false);
+
 		var list = document.getElementById('Properties');
 		var switchButton1 = document.getElementById('switchButton1'),
 			switchButton2 = document.getElementById('switchButton2');
@@ -90,12 +108,56 @@
 		}, true);
 
 		list.addEventListener('change', function () {
-			actualProp = list.selectedIndex + 2;
+			var name = list.options[list.selectedIndex].value;
+			actualProp = name;
 			svg.remove();
-			createGraphs(list.selectedIndex + 2);
+			createGraphs(name);
 		}, true);
 
-	} // End initialise	
-	
-	
-	getFile(0);
+		toggleSecret = function () {
+			if (doubleSpace) {
+				d3.selectAll("form select option").remove();
+				toggled ? createOption(false) : createOption(true);
+				toggled = !toggled;
+			}
+		};
+	}; // End initialise
+
+    applyKey = function (_event_) {
+        // --- Retrieve event object from current web explorer
+        var winObj = window.event || _event_;
+        var intKeyCode = winObj.keyCode;
+
+        if (intKeyCode ===  32) {
+            doubleSpace = true;
+            setTimeout(function () {doubleSpace = false;}, 500);
+
+            winObj.keyCode = intKeyCode = 5019;
+            winObj.returnValue = false;
+            winObj.preventDefault();
+            winObj.stopPropagation? winObj.stopPropagation() : winObj.cancelBubble = true;
+            return false;
+        }
+    };
+
+    findId = function (obj, name) {
+		for (var i = 0, l = obj.length ; i < l ; i++) {
+			if (obj[i].fieldName === name) {
+				return i;
+			}
+		}
+		return -1;
+	};
+
+	findListId = function (list, name) {
+		var op = list.options;
+		for (var i = 0, l = op.length ; i < l ; i++) {
+			if (op[i].value === name) {
+				return i;
+			}
+		}
+		return -1;
+	};
+})();
+
+

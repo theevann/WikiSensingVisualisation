@@ -1,0 +1,40 @@
+﻿<!doctype html>
+<html>
+
+<head>
+	<title>WikiSensing Data Visualisation</title>
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+	<script src="scriptFiles\d3-transform.js"></script>
+	<link rel="stylesheet" type="text/css" href="../cssFiles/common.css" />
+	<link rel="stylesheet" type="text/css" href="cssFiles/wikiSensing.css" />
+</head>
+
+<body>
+	<div id="header">
+		<span id="title">WikiSensing Data Visualisation Tool</span>
+		<button id="back" onclick="window.location.href='../index.html'">Back to Index</button>
+	</div>
+	
+	<FORM id ="menu">
+		<label for="choice1">Service Key :</label>
+		<SELECT id="choice1" size="1">
+		</SELECT>
+		<label for="choice2">Sensor Id :</label>
+		<SELECT id="choice2" size="1">
+		</SELECT>
+		<label for="choice3_1">Property 1:</label>
+		<SELECT id="choice3_1" size="1" style="background:#1f77b4;">
+		</SELECT>
+		<label for="choice3_2">Property 2:</label>
+		<SELECT id="choice3_2" size="1" style="background:#ff7f0e;">
+		</SELECT>
+		<label for="measurements">Number of Measurements :</label> 
+		<input type="number" step="1" value="1000" min="10" max="100000" id="measurements"> <!-- ms / frame -->
+	</FORM>
+	
+	<div id="chart"></div>
+	
+</body>
+<script src="scriptFiles\wikiSensingCreateGraph.js"></script>
+<script src="scriptFiles\wikiSensing.js"></script>
+</html>

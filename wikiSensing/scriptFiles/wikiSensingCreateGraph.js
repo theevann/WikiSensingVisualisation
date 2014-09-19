@@ -1,35 +1,59 @@
-﻿	var createGraph = function(p1, p2, v1, v2){
-		var w = window,
-		d = document,
-		e = d.documentElement,
-		g = d.getElementsByTagName('body')[0],
-		W = e.clientWidth ||w.innerWidth || g.clientWidth,
-		H = w.innerHeight|| e.clientHeight|| g.clientHeight;
+﻿(function(){
+	
+	var svg;
+	var width, height, graphHeight, graphWidth;
+	var tooltip = d3.select("body")
+	.append("div")
+	.style("position", "absolute")
+	.style("z-index", "10")
+	.style("background-color", "white")
+	.style("opacity", 0.9)
+	.style("visibility", "hidden")
+	.text("a simple tooltip");
+	
+	createGraph = function(p1, p2, p, typeY1, typeY2, typeX, typeGraph, wdth, hgt){
 		
-		var width = W,
-		height = H*0.8;
+		width = wdth | parseFloat(d3.select("#chart").style("width"));
+		height = hgt| parseFloat(d3.select("#chart").style("height"));
 		
-		var graphHeight = parseInt(0.95* height);
-		var graphWidth = parseInt(0.85*width);
+		graphHeight = parseInt(0.95*height);
+		graphWidth = parseInt(0.85*width);
+		var x, y1, y2, y1Axis, y2Axis;
 		
+		d3.select("#textInfo").style("display","none");
 		d3.selectAll("svg").remove();
-		var svg = d3.select("#chart").append("svg")
+		svg = d3.select("#chart").append("svg")
 			.attr("width", width)
 			.attr("height", height)
 			
 		var gr = svg.append("g")
-			.attr("transform", "translate(" + parseInt((width-graphWidth)/2) + "," + 0 + ")")
+			.attr("transform", "translate(" + parseInt((width-graphWidth)/2) + "," + parseInt((height-graphHeight)/3) + ")")
 			.attr("class", "graph")
 			.attr("width", graphWidth)
 			.attr("height", graphHeight);
 				
 		var colors = d3.scale.category20();
 		
-		if((p1+p2) != 0){
-			x = d3.time.scale()
-				.range([0, graphWidth])
-				.domain([data.sensorRecords[0].date, data.sensorRecords[data.sensorRecords.length - 1].date]);
+		if((p1+p2) != -2){ // If there is something to plot
+			if(typeX == 0)
+				x = d3.time.scale()
+					.domain([data.sensorRecords[0].x, data.sensorRecords[data.sensorRecords.length - 1].x]);
+			else if(typeX == 1)
+				x = d3.scale.linear()
+					.domain([data.sensorRecords[0].x, data.sensorRecords[data.sensorRecords.length - 1].x]);
+			else{
+				var xDomain = new Array(); 
+				data.sensorRecords.forEach(function(d,i) {
+					if(xDomain.indexOf(d.x) == -1)
+						xDomain.push(d.x);
+				});
+				
+				x = d3.scale.ordinal()
+					.domain(xDomain);
+			}
 			
+			x.range([0, graphWidth])
+		
 			xAxis = d3.svg.axis()
 				.scale(x)
 				.orient("bottom")
@@ -42,18 +66,8 @@
 			  .call(xAxis)
 		}
 		
-		if(p1 != 0){
-			if(v1)
-				y1 = d3.time.scale();
-			else
-				y1 = d3.scale.linear();
-			
-			y1.range([graphHeight, 0]);
-
-			y1.domain([
-				d3.min(data.sensorRecords, function(d) { return d.prop1; }),
-				d3.max(data.sensorRecords, function(d) { return d.prop1; }),
-			  ]);
+		if(p1 != -1){ // If property 1 is different from "None"
+			y1 = initAxis(typeY1, y1, "prop1"); // Define the type of axis and the domain
 			
 			y1Axis = d3.svg.axis()
 				.scale(y1)
@@ -67,21 +81,12 @@
 			  .attr("y", 6)
 			  .attr("dy", ".71em")
 			  .style("text-anchor", "end")
+			  .style("stroke", "#1f77b4")
 			  .text(data.sensorRecords[0].sensorObject[p1].fieldName);
 		}
 		
-		if(p2 != 0){
-			if(v2)
-				y2 = d3.time.scale();
-			else
-				y2 = d3.scale.linear();
-			
-			y2.range([graphHeight, 0]);
-			
-			y2.domain([
-				d3.min(data.sensorRecords, function(d) { return d.prop2; }),
-				d3.max(data.sensorRecords, function(d) { return d.prop2; }),
-			]);			
+		if(p2 != -1){ // If property 2 is different from "None"
+			y2 = initAxis(typeY2, y2, "prop2"); // Define the type of axis and the domain
 			
 			y2Axis = d3.svg.axis()
 				.scale(y2)
@@ -96,31 +101,93 @@
 			  .attr("y", -20)
 			  .attr("dy", ".71em")
 			  .style("text-anchor", "end")
+			  .style("stroke", "#ff7f0e")
 			  .text(data.sensorRecords[0].sensorObject[p2].fieldName);		
 		}
 		
+		d3.selectAll(".axis text").on("mouseover", function(d){tooltip.text(d);return tooltip.style("visibility", "visible");})
+		.on("mousemove", function(){return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
+		.on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+		
 		var line = new Array();
-
+		 
 		line[0] = d3.svg.line()
-			.x(function(d) { return x(d.date); })
-			.y(function(d) { return y1(d.prop1) ; });
+			.x(function(d) { return x(d.x); })
+			.y(function(d) { return y1(d.prop1) ; })
+			.interpolate(typeGraph); // curve (typeGraph="basis") or line (typeGraph="linear")
 		
 		line[1] = d3.svg.line()
-			.x(function(d) { return x(d.date); })
-			.y(function(d) { return y2(d.prop2) ; });
+			.x(function(d) { return x(d.x); })
+			.y(function(d) { return y2(d.prop2) ; })
+			.interpolate(typeGraph); // curve (typeGraph="basis") or line (typeGraph="linear")
 
-		if(p1 != 0)
-		gr.append("path")
-			.datum(data.sensorRecords)
-			.attr("class", "line")
-			.attr("d", line[0])
-			.style("stroke", "#1f77b4");
+		// Plot line/points graphs	
+		//For Property 1
 		
-		if(p2 != 0)
-		gr.append("path")
-			.datum(data.sensorRecords)
-			.attr("class", "line")
-			.attr("d", line[1])
-			.style("stroke", "#ff7f0e");
+		if(p1 != -1){ // If it's not "none"
+			if(typeGraph != "point")
+			  gr.append("path")
+				.datum(data.sensorRecords)
+				.attr("class", "line")
+				.attr("d", line[0])
+				.style("stroke", "#1f77b4");
+			else
+			  gr.selectAll('circle .c1')
+				.data(function(d){ return data.sensorRecords})
+				.enter().append('circle').attr("class","c1")
+				.attr("cx", function(d) { return x(d.x) })
+				.attr("cy", function(d) { return y1(d.prop1) })
+				.attr("r", 3.5)
+				.style("fill", "white")
+				.style("stroke", "#1f77b4");
+		}
 		
+		//For Property 2
+
+		if(p2 != -1){ // If it's not "none"
+			if(typeGraph != "point")
+			  gr.append("path")
+				.datum(data.sensorRecords)
+				.attr("class", "line")
+				.attr("d", line[1])
+				.style("stroke", "#ff7f0e");
+			else
+			  gr.selectAll('circle .c2')
+				.data(function(d){ return data.sensorRecords})
+				.enter().append('circle').attr("class","c2")
+				.attr("cx", function(d) { return x(d.x) })
+				.attr("cy", function(d) { return y2(d.prop2) })
+				.attr("r", 3.5)
+				.style("fill", "white")
+				.style("stroke", "#ff7f0e");
+		}
 	};
+	
+	var initAxis = function(typeY, y, prop){
+		if(typeY == 0) // If a time parser succeed in parsing the data
+			y = d3.time.scale()
+				.domain([
+						d3.min(data.sensorRecords, function(d) { return d[prop]; }),
+						d3.max(data.sensorRecords, function(d) { return d[prop]; })
+						]);
+		else if(typeY == 1) // Else, if the float parser succeed in parsing the data
+			y = d3.scale.linear()
+				.domain([
+						d3.min(data.sensorRecords, function(d) { return d[prop]; }),
+						d3.max(data.sensorRecords, function(d) { return d[prop]; })
+						]);
+		else{ // If it's a string ...
+			var yDomain = new Array(); 
+			data.sensorRecords.forEach(function(d,i) {
+				if(yDomain.indexOf(d[prop]) == -1)
+					yDomain.push(d[prop]);
+			});
+			
+			y = d3.scale.ordinal()
+				.domain(yDomain);
+		}			
+		
+		y.range([graphHeight, 0]);
+		return y;
+	}
+})();
