@@ -75,6 +75,7 @@
 	//Loading Data
 	
 	var data = []; // To contain data
+	var computedData = []; // To contain data
 	var bar = d3.select('#progBar');
 	
 	var getFile = function (file, firstTime){
@@ -103,7 +104,7 @@
 	//End Loading Data
 	//----------------------
 	
-	var min, max, color, svg, active, numRepresentation = 0, frame, dataEnd, repEnd, repPas, dataStart, repStart, scalingPeriod, numMes, startTime;
+	var min, max, color, svg, active, numRepresentation = 0, frame, dataEnd, repEnd, repPas, dataStart, repStart, scalingPeriod, numMes, startTime, speed;
 	
 	//Find extent over specific period of time around a given time
 	
@@ -390,7 +391,7 @@
 		
 		//Create options in the property form
 		
-		createOption = function (s) {
+		var createOption = function (s) {
 			data[0].sensorRecords[0].sensorObject.forEach(function (d, j) {
 				var id = propertiesShown.indexOf(d.fieldName);
 				if(s || id >= 0)
@@ -400,8 +401,6 @@
 						.attr('value', d.fieldName);
 			});
 			d3.select('#Properties option:nth-child(' + findListId(d3.select('#Properties').node(), option) + ')').attr('selected', 'selected');
-			d3.select('#PropertiesComp1 option:nth-child(' + (findListId(d3.select('#PropertiesComp1').node(), p1) + 1) + ')').attr('selected','selected');
-			d3.select('#PropertiesComp2 option:nth-child(' + (findListId(d3.select('#PropertiesComp2').node(), p2) + 1) + ')').attr('selected','selected');
 		};
 
 		createOption(false);
@@ -431,7 +430,7 @@
 	//Function for creating a color map at the time index given (between 1 and 1000)
 	
 	var createRepresentation  = function (time) {
-		
+		var circ, lineH, lineV, stop, gr, text;
 		//Redraw Scale depending on the scaling period
 		initColorAndScale();
 				
@@ -440,7 +439,7 @@
 		d3.select('#date').text(new Date(startTime.getTime() + time * 60000) + ' / Min : ' + minT + ', Max : ' + maxT);
 		
 		
-		var gr = svg.selectAll('.rg').data(pos);
+		gr = svg.selectAll('.rg').data(pos);
 
 		gr.enter().append('radialGradient').classed('rg', true)                
 			.attr('id', function (d,i) { return 'area-gradient' + i; })
@@ -448,7 +447,7 @@
 			.attr('fx', '50%').attr('fy', '50%')         
 			.attr('r', '50%');
 
-		var stop = gr.selectAll('stop')
+		stop = gr.selectAll('stop')
 			.data([
 				{offset: '0%', opacity : 1},
 				{offset: '15%', opacity : 1},
