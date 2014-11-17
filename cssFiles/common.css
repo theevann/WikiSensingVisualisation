@@ -13,8 +13,9 @@ body {
 	position:relative;
 	text-align: center;
 	font-size: 2em;
-	background-color: #aec3fc;
-	border-radius: 10px;
+	/*background-color: #aec3fc;*/
+	color : white;
+	background-color: black;
 	box-shadow: 3px 3px 6px 0 #A9A9A9;
 	padding: 0.2em 0em;
 	margin-bottom: 0.3em;
@@ -104,25 +105,33 @@ progress::-webkit-progress-value {
 	margin-right: auto;
 	margin-left: auto;
 	margin-top : 5%;
-	list-style-type: circle;
+	text-align : center;
+	list-style-type: none;
 	font: 2em sans-serif;
-	background-color: #aec3fc;
-	border-radius: 10px;
+	background-color: black;
+	color : white;
 	box-shadow: 3px 3px 6px 0 #A9A9A9;
 	padding-top: 1em;
 	padding-bottom : 0.1em;
 }
 
+ol#indexMenu  {
+	padding : 20px;
+}
+
 #indexMenu li {
+	margin : 0;
+	padding : 0;
 	margin-bottom : 5%;
 }
 
 #indexMenu a{
 	text-decoration: none;
-	color: black;
-	transition: color 0.5s;
+	color: white;
+	transition: color 0.2s;
 }
 
 #indexMenu a:hover{
+	color : white;
 	text-decoration: underline;
 }

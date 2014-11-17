@@ -229,7 +229,7 @@ var createGraphs = function (propName) {
             .style("text-anchor", "middle")
             .style("font-size", "15em")
             .style("opacity", "0.1")
-            .text(j+1);
+            .text(j+sensorFrom);
             
         graph[j].append("path")
           .datum(data[j].sensorRecords)

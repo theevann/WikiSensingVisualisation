@@ -24,13 +24,17 @@
 		offsetImg = {top : 0, left : 0},
 		propertiesShown = ['temperature', 'humidity', 'light1', 'light2', 'batteryVoltage'];
 
-	var papPos = [
+	var sensorFrom = 7,
+		sensorTo = 30,
+		numSensors = sensorTo - sensorFrom + 1;
+
+	var papPos = [/*
 			{x:24.9,y:2.9},
 			{x:25.1,y:5.4},
 			{x:22.6,y:1.3},
 			{x:22.6,y:2.9},
 			{x:22.8,y:5.4}, // 5
-			{x:22.9,y:6.2},
+			{x:22.9,y:6.2},*/
 			{x:20.5,y:1.4},
 			{x:19.3,y:3.2},
 			{x:19.5,y:4.3},
@@ -68,6 +72,8 @@
 		offsetImg.left = (dimension.x - dimensionImg.x) / 2;
 	}
 
+	var radius = 80 * dimensionImg.x / 1400;
+
 	var pos = papPos.map(function (d) {return {x : d.x / papWidth * dimensionImg.x + offsetImg.left, y : d.y / papHeight * dimensionImg.y + offsetImg.top};});
 
 	var formatValue = d3.format(',.2f');
@@ -77,29 +83,30 @@
 	var data = []; // To contain data
 	var computedData = []; // To contain data
 	var bar = d3.select('#progBar');
-	
+	bar.attr('max', numSensors);
+
 	var getFile = function (file, firstTime){
-		d3.json('http://wikisensing.org/WikiSensingServiceAPI/DCEWilliamPenneyUpperFloorzYyYFkLwEygj7B0vvQWQ/Node_' + (file+1) + '/' + numMes, function (error, json) {
+		d3.json('http://wikisensing.org/WikiSensingServiceAPI/DCEWilliamPenneyUpperFloorzYyYFkLwEygj7B0vvQWQ/Node_' + (file) + '/' + numMes, function (error, json) {
 			if (error) {
 				d3.select('#downloadProgress').text('Impossible to load data');
 				return console.warn(error);
 			}
-			data[file] = json;
+			data[file - sensorFrom] = json;
 			//Display loading of data
-			bar.attr('value', file);
-			d3.select('#downloadProgress').text('Retrieving Data ... ' + (file + 1) + '/30');
-			if (file === 29) {
+			bar.attr('value', file - sensorFrom + 1);
+			d3.select('#downloadProgress').text('Retrieving Data ... ' + (file - sensorFrom + 1) + "/" + numSensors);
+			if (file === sensorTo) {
 				d3.select('#progress').style('display','none');
 				initialize();
 				if (firstTime)
 					initializeListeners();
-			} else if (file < 29) {
+			} else if (file < sensorTo) {
 				getFile(file + 1, firstTime);
 			}
 		});
 	};
 	
-	getFile(0, true);
+	getFile(sensorFrom, true);
 	
 	//End Loading Data
 	//----------------------
@@ -108,7 +115,7 @@
 	
 	//Find extent over specific period of time around a given time
 	
-	var findExtent = function (frameTime){
+	var findExtent = function (frameTime) {
 		var extentTime = [dataStart, dataEnd];
 		var extentValue = [];
 		
@@ -116,21 +123,18 @@
 			extentValue[0] = d3.min(computedData, function (c) { return d3.min(c); });
 			extentValue[1] = d3.max(computedData, function (c) { return d3.max(c); });
 			return extentValue;
-		}
-		else if((frameTime - dataStart) < parseInt(scalingPeriod/2)){
+		} else if((frameTime - dataStart) < parseInt(scalingPeriod/2)){
 			extentTime[1] = dataStart + scalingPeriod;
-		}
-		else if((dataEnd - frameTime) < parseInt(scalingPeriod/2)){
+		} else if((dataEnd - frameTime) < parseInt(scalingPeriod/2)){
 			extentTime[0] = dataEnd - scalingPeriod;
-		}
-		else{
+		} else {
 			 extentTime[0] = frameTime-parseInt(scalingPeriod/2);
 			 extentTime[1] = frameTime+parseInt(scalingPeriod/2);
 		}
 		
 		extentValue[0] = d3.min(computedData, function (d) {
 			var min = d[extentTime[0]];
-			for(var j = extentTime[0]+1 ; j < extentTime[1]; j++){
+			for (var j = extentTime[0]+1 ; j < extentTime[1]; j++) {
 				min = (d[j] < min)? d[j] : min;
 			}
 			return min;
@@ -138,7 +142,7 @@
 		
 		extentValue[1] = d3.max(computedData, function (d) {
 			var max = d[extentTime[0]];
-			for(var j = extentTime[0]+1 ; j < extentTime[1]; j++){
+			for (var j = extentTime[0]+1 ; j < extentTime[1]; j++) {
 				max = (d[j] > max)? d[j] : max;
 			}
 			return max;
@@ -284,8 +288,8 @@
 			});
 		});
 
-		var min = d3.max(data, function (c) { return d3.min(c.sensorRecords, function (d) { return d.date; }); });
-		var max = d3.min(data, function (c) { return d3.max(c.sensorRecords, function (d) { return d.date; }); });
+		var min = d3.min(data, function (c) { return d3.min(c.sensorRecords, function (d) { return d.date; }); });
+		var max = d3.max(data, function (c) { return d3.max(c.sensorRecords, function (d) { return d.date; }); });
 		startTime = min;
 		var b = d3.bisector(function (d) {return d.date;}).right;
 		var array = [];
@@ -295,7 +299,7 @@
 			var s = d.sensorRecords;
 			d3.range(min.getTime(), max.getTime(), 60000).map(function (e,i) {
 				var id = b(s, new Date(e));
-				var val = ((e - s[id - 1].date) * s[id - 1].prop + (s[id].date - e) * s[id].prop) / (s[id].date - s[id - 1].date);
+				var val = (id === 0) ? false : (id === s.length) ? false : ((e - s[id - 1].date) * s[id - 1].prop + (s[id].date - e) * s[id].prop) / (s[id].date - s[id - 1].date);
 				array.push(val);
 			});
 			return array;
@@ -378,7 +382,7 @@
 			d3.selectAll('svg').remove();
 			d3.select('#divImg').remove();
 			d3.select('#progress').style('display','block');
-			getFile(0, false);
+			getFile(sensorFrom, false);
 		 }, true);
 		
 		//Listen to the time scale form
@@ -459,18 +463,18 @@
 			.attr('stop-opacity', function (d) { return d.opacity;})
 			.attr('stop-color', 'white');
 
-		svg.selectAll('.rg stop').transition().duration(speed).attr('stop-color', function (d,j) {return color(computedData[~~(j/3)][time]); });
+		svg.selectAll('.rg stop').transition().duration(speed).attr('stop-color', function (d,j) {return computedData[~~(j/3)][time] !== false ? color(computedData[~~(j/3)][time]) : "white"; });
 		
 		//Draw cross representing the nodes
 		circ = svg.selectAll('circle').data(pos);
 
 		circ.enter().append('circle')
-			.style('opacity', 0.8)
+			.style('opacity', 0)
 			.attr('cx', function (d) {return d.x;})
 			.attr('cy', function (d) {return d.y;})
-			.attr('r', 80);
+			.attr('r', radius);
 
-		circ.style('fill', function (d,j) {return 'url(#area-gradient' + j +')';});
+		circ.style('fill', function (d,j) {return 'url(#area-gradient' + j +')';}).transition().duration(speed).style("opacity", function (d, j) { return computedData[j][time] !== false ? 0.8 : 0 ;} );
 
 		lineH = svg.selectAll('.horizontal').data(pos);
 		lineV = svg.selectAll('.vertical').data(pos);
@@ -497,7 +501,7 @@
 			.attr('y', function (d) {return d.y;})
 			.attr('dx', 7)
 			.attr('dy', 4)
-			.text(function (d,i) {return i+1;});
+			.text(function (d,i) {return i+sensorFrom;});
 	};
 	
 	// Auxiliary function to stop time representation

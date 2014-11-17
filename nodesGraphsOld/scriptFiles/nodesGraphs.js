@@ -1,42 +1,43 @@
-﻿var load, findId, findListId, applyKey, toggleSecret;
+﻿var load, findId, findListId, applyKey, toggleSecret, sensorFrom, sensorTo, numSensors;
 var data = [];
 
 (function () {
 	var actualProp = "temperature";
 	var propertiesShown = ['temperature', 'humidity', 'light1', 'light2', 'batteryVoltage'];
 
-	var numSensors;
 	var bar = d3.select("#progBar");
 	var toggled = false, doubleSpace = false;
 
-	load = function (serverAdress, num) {
-		numSensors = num;
+	load = function (serverAdress, from, to) {
+		sensorFrom = from;
+		sensorTo = to;
+		numSensors = sensorTo - sensorFrom + 1;
 		bar.attr('max', numSensors);
-		getFile(serverAdress, 0);
+		getFile(serverAdress, sensorFrom);
 	};
 
 	var getFile = function (adress, file) {
-	    d3.json(adress + "Node_" + (file + 1), function (error, json) {
+	    d3.json(adress + "Node_" + (file) + "/1440", function (error, json) {
 	        if (error) {
 	            d3.select("#downloadProgress").text("Impossible to load data");
 	            return console.warn(error);
 	        }
 			
-	        data[file] = json;
+	        data[file - sensorFrom] = json;
 	        
-	        bar.attr("value", file);
+	        bar.attr("value", file - sensorFrom + 1);
 			console.log("File : " + file);
-			d3.select("#downloadProgress").text("Retrieving Data ... " + (file + 1) + "/" + numSensors);
+			d3.select("#downloadProgress").text("Retrieving Data ... " + (file - sensorFrom + 1) + "/" + numSensors);
 	        
-	        if (file === (numSensors - 1)) {
+	        if (file === (sensorTo)) {
 	            d3.select("#progress").style("display", "none");
-				//Initialise listeners and variables
+				// Initialise listeners and variables
 				initialise();
 				initTab1();
 				initTab2();
-				//Show first the 15 graphs
+				// Show first the 15 graphs
 	            createGraphs(actualProp);
-	        } else if (file < (numSensors - 1)) {
+	        } else if (file < (sensorTo)) {
 	            getFile(adress, file + 1);
 			}
 	    });

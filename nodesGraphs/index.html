@@ -1,0 +1,87 @@
+<html>
+	<head>
+		<title>Sensors graphs</title>
+		<link rel="stylesheet" type="text/css" href="css/pikaday.css" />
+		<link rel="stylesheet" type="text/css" href="css/style.css" />
+        <script src="http://d3js.org/d3.v3.min.js"></script>
+	</head>
+	<body>
+        <div id="header">
+			<div id="menu" style="display:none;">
+			<table>
+			    <tr>
+					<td colspan="2">			
+					<button id="switchButton" style="width:100%">Comparison View</button>
+					</td>
+			    </tr>
+			    <tr>
+				   <td>
+						<FORM  style="margin:0">
+							<SELECT id="P1" size="1">
+							</SELECT>
+						</FORM>
+					</td>
+				    <td>
+						<FORM style="margin:0">
+							<SELECT id="P2" size="1" >
+							</SELECT>
+						</FORM>
+					</td>
+				</tr>
+			    <tr style="display:none" class="hidden">
+				    <td>
+						<button id="rescaleAllButton" style="width:100%">Rescale</button>
+					</td>
+					<td>
+						<button id="refreshButton" style="width:100%">Refresh</button>
+					</td>
+				</tr>
+			    <tr style="display:none" class="hidden">
+				    <td>
+						<label for="sync"><input type="checkbox" id="sync">Zoom sync</label>
+					</td>
+					<td>
+						<label for="guideLine"><input type="checkbox" id="guideLine" checked="checked">Guide Line</label>
+					</td>
+				</tr>
+			    <tr style="display:none" class="hidden advanced">
+					<td>
+						<label for="datepicker">Date : <input type="text" id="datepicker" size="6"></label>
+					</td>
+					<td>
+						<label for="measurements">Number : <input type="text" value="1440" id="measurements" size="4"></label>
+					</td>
+				</tr>
+				<tr>	
+					<td colspan="2">
+						<button id="expandButton" style="width:100%;font-size:0.5em;font-weight:bold" value="false" >></button>
+					</td>
+			    </tr>
+			</table>
+			</div>
+		</div>
+        <div id="content">
+			<div id="comparison-menu" style="display:none">
+				<button id="showAllButton" style="font-weight:bold" >Show All
+				</button><button id="hideAllButton" style="font-weight:bold" >Hide All
+				</button><button id="inverseButton" style="font-weight:bold" >Inverse
+				</button><button id="rescaleButton" style="font-weight:bold" >Rescale</button>
+			</div>
+		</div>
+		<div id ="test" style="position:absolute;"></div>
+		
+        <script> var dev = true; </script>
+        <script src="js/charts.js"></script>
+        <script src="js/utils.js"></script>
+        <script src="js/contextMenu.js"></script>
+        <script src="js/loading.js"></script>
+        <script src="js/pikaday.js"></script>
+        <script src="js/new.js"></script>
+        <script>
+			var serverAddress = "http://wikisensing.org/WikiSensingServiceAPI/DCEWilliamPenneyUpperFloorzYyYFkLwEygj7B0vvQWQ/",
+			number = d3.range(7, dev ? 19 : 31);
+			
+			loadData(serverAddress, number);
+		</script>
+	</body>
+</html>

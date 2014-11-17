@@ -5,16 +5,16 @@ var initTab2 = function() {
 			deselectButton = document.getElementById('deselectAll');
 		
 		selectButton.addEventListener('click', function () {
-			for (var j = 0; j < data.length; j++) {
-				var checkB = document.getElementById('c' + (j + 1));
+			for (var j = 0 ; j < data.length ; j++) {
+				var checkB = document.getElementById('c' + (j + sensorFrom));
 				checkB.checked = true;
 				captorsUpdate.apply(checkB, []);
 			}
 		}, true);
 
 		deselectButton.addEventListener('click', function () {
-			for (var j = 0; j < data.length; j++) {
-				var checkB = document.getElementById('c' + (j + 1));
+			for (var j = 0 ; j < data.length ; j++) {
+				var checkB = document.getElementById('c' + (j + sensorFrom));
 				checkB.checked = false;
 				captorsUpdate.apply(checkB, []);
 			}
@@ -40,7 +40,7 @@ var createComparisonGraph = function () {
 	
 	svg = d3.select("#chart").append("svg")
 		.attr("width", width)
-		.attr("height", height)
+		.attr("height", height);
 			
 	var colors = d3.scale.category20();
 	var checkboxs = d3.selectAll("p input");
@@ -119,11 +119,11 @@ var createComparisonGraph = function () {
 		}
 		
         if (cap.checked) {
-            data[index-1].sensorRecords.forEach(function (d,i) {
+            data[index-sensorFrom].sensorRecords.forEach(function (d,i) {
             	var id = findId(d.sensorObject, p1);
                 d.prop1 = id >= 0 ? d.sensorObject[id].value : 0;
             });
-            data[index-1].sensorRecords.forEach(function (d,i) {
+            data[index-sensorFrom].sensorRecords.forEach(function (d,i) {
             	var id = findId(d.sensorObject, p2);
                 d.prop2 = id >= 0 ? d.sensorObject[id].value : 0;
             });
@@ -160,12 +160,12 @@ var createComparisonGraph = function () {
 		});
 		
 		if(typeof myPath != "undefined") {
-			myPath.datum(data[index].sensorRecords)
+			myPath.datum(data[index-sensorFrom+1].sensorRecords)
 				.attr("d", line[pNm-1])
 		}
 		else{
 			d3.select("#capt" + index ).append("path")
-			.datum(data[index].sensorRecords)
+			.datum(data[index-sensorFrom+1].sensorRecords)
 			.attr("class", "lineComp")
 			.attr("d", line[pNm-1])
 			.attr("captor",index)
