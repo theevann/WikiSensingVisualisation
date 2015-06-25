@@ -37,9 +37,28 @@ var loadData = function (address, captorsNumber) {
 			updateLoadingBar(d);
 		})
 		.get( function (error, json) {
-			if (error) {
-				showError(d);
-				return console.warn(error);
+			try {
+				if (error) {
+					error.sensor = d;
+					throw error;
+				} else if (json.sensorRecords.length === 0) {
+					error = {status : 0, sensor : d}
+					throw error;
+				}
+			} catch (error) {
+				if (error.status === 400) {
+					console.warn("Server answered 'Bad request' (400) : The sensor " + error.sensor + " may not exist");
+					sensorsToLoad.splice(sensorsToLoad.indexOf(d), 1);
+					--end;
+				} else if (error.status === 0) {
+					console.warn("Empty response for sensor " + error.sensor);
+					sensorsToLoad.splice(sensorsToLoad.indexOf(d), 1);
+					--end;
+				} else {
+					showError(d);
+					console.error(error.statusText);
+				} 
+				return;
 			}
 			
 			var obj = d3.map();
@@ -56,9 +75,9 @@ var loadData = function (address, captorsNumber) {
 				});
 			});
 			
-			console.log("Data from Captor " + d + " loaded");
+			//console.log("Data from Sensor " + d + " loaded");
 			if (--end === 0) {
-				console.log("Loaded");
+				console.log("Loaded : " + sensorsToLoad);
 				endLoadingBar();
 				createOptions(advanced);
 				listenMenu();

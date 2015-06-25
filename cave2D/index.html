@@ -9,6 +9,7 @@
 	-->
 	<link rel="stylesheet" type="text/css" href="../cssFiles/common.css" />
 	<link rel="stylesheet" type="text/css" href="css/style.css" />
+	<link rel="stylesheet" type="text/css" href="css/pikaday.css" />
 	<!--
 	<link rel="stylesheet" type="text/css" href="graphicalRepresentation.css">
 	-->
@@ -16,7 +17,7 @@
 
 <body>
 	<div id="header">
-		<span id="title">Willia<span onclick="toggleAdvanced()">m</span> Penney Lab Upper Floor</span>
+		<span id="title">Willia<span onclick="toggleAdvanced()">m</span> Penney Cave Room</span>
 		<button id="back" onclick="window.location.href='../index.html'">Back to Index</button>
 	</div>
 	
@@ -39,23 +40,26 @@
 			</SELECT>
 			<label for="speed">Speed(ms) :</label> 
 			<input type="number" step="1" value="500" min="1" max="10000" id="speed"> <!-- ms / frame -->
-			<label for="step">Step :</label> 
+			<label for="step">Step(min) :</label> 
 			<input type="number" step="1" value="10" min="1" max="1000" id="step"> <!-- ms / frame -->
 			<label for="measurements">Measurements :</label> 
 			<input type="number" step="1" value="1440" min="10" max="100000" id="measurements">
+			<label for="datepicker">Date :</label>
+			<input type="text" id="datepicker" size="6">
+			<button id = "reload" disabled='disabled'  style="width:60px">Reload</button>
 		</FORM>
 	</div>
-	<p id="date" style="padding-left: 5px">-</p>
+	<p id="date" style="padding-left: 5px">Loading ...</p>
 
 	<div id = "graph"></div>
 
-	<script src="utils.js"></script>
-	<script src="2d.js"></script>
-	<script src="loading.js"></script>
+	<script src="js/utils.js"></script>
+	<script src="js/2d.js"></script>
+	<script src="js/loading.js"></script>
+	<script src="js/pikaday.js"></script>
 	<script>
 		var serverAddress = "http://wikisensing.org/WikiSensingServiceAPI/DCEWilliamPenneyGDOZ5RZRs3ibUqI9G1KAyoJw/",
-			number = d3.merge([d3.range(101, 105), d3.range(106, 126), d3.range(127, 135), d3.range(136, 141)]);
-			//number = d3.merge([d3.range(101, 105), d3.range(106, 108)]);
+			number = d3.range(101, 141);
 			
 		loadData(serverAddress, number);
 	</script>

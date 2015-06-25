@@ -1,11 +1,11 @@
 var loadData;
 var data;
 var dateKey = "Created";
+var p;
 
-/*
 (function () {
 	'use strict';
-//*/
+
 	d3.select("html")
 		.attr("margin", 0)
 		.attr("padding", 0);
@@ -23,10 +23,24 @@ var dateKey = "Created";
 		newHeight,
 		newOffsetX = 0,
 		newOffsetY = 0;
+		
+	var propertiesShown = ['temperature', 'humidity', 'light1', 'light2', 'batteryVoltage'],
+		property = 'temperature',
+		numberOfPointsToLoad = 1440, // 1440 minutes in a day
+		date = new Date(+(new Date ()) - 1000 * 60 * 60 * 24),
+		radius = H / 30;
+		
+	/*
+	* Dimensions in meter
+	*/
 	
 	var roomX = 9,
 		roomY = 8.5,
 		diameter = 6;
+		
+	/*
+	* Position of sensors not on the cave
+	*/
 	
 	var position = d3.map();
 	position.set(133, [0, 0, 0]);
@@ -38,8 +52,10 @@ var dateKey = "Created";
 	position.set(139, [roomX / 2, 0, 0]);
 	position.set(140, [roomX, roomY / 2, 0]);
 	
-	var toScreen = (function () {
-		
+	var corners = ['133', '134', '135'];
+	var center = "137";
+	
+	var toScreen = (function () {		
 		if (widthPlot / roomX > heightPlot / roomY) {
 			newHeight = heightPlot;
 			newWidth = newHeight * roomX / roomY;
@@ -58,22 +74,16 @@ var dateKey = "Created";
 		};
 	})();
 		
-	var space = false, advanced = false,
-		propertiesShown = ['temperature', 'humidity', 'light1', 'light2', 'batteryVoltage'],
-		property = 'temperature',
-		numberOfPointsToLoad = 100,
-		date = new Date(+(new Date ()) - 1000 * 60 * 60 * 24),
-		radius = 20;
-
+	
 	var serverAddress,
 		sensorsToLoad,
 		initialized = false,
+		space = false,
+		advanced = false,
 		timeFormat = d3.time.format("%H : %M"),
 		wikiSensingTimeFormat = d3.time.format("%Y%m%dT%H%M%SZ"),
-		formatValue = d3.format(',.2f'),
-		ct; // For timeout
+		formatValue = d3.format(',.2f');
 	
-
 	/*
 	*	Getting and preparing the data
 	*/
@@ -95,10 +105,29 @@ var dateKey = "Created";
 			.on("progress", function() { 
 				updateLoadingBar(d);
 			})
-			.get( function (error, json) {
-				if (error) {
-					showError(d);
-					return console.warn(error);
+			.get(function (error, json) {
+				try {
+					if (error) {
+						error.sensor = d;
+						throw error;
+					} else if (json.sensorRecords.length === 0) {
+						error = {status : 0, sensor : d}
+						throw error;
+					}
+				} catch (error) {
+					if (error.status === 400) {
+						console.warn("Server answered 'Bad request' (400) : The sensor " + error.sensor + " may not exist");
+						sensorsToLoad.splice(sensorsToLoad.indexOf(d), 1);
+						--end;
+					} else if (error.status === 0) {
+						console.warn("Empty response for sensor " + error.sensor);
+						sensorsToLoad.splice(sensorsToLoad.indexOf(d), 1);
+						--end;
+					} else {
+						showError(d);
+						console.error(error.statusText);
+					} 
+					return;
 				}
 				
 				var obj = d3.map();
@@ -116,9 +145,9 @@ var dateKey = "Created";
 					});
 				});
 				
-				console.log("Data from Sensor " + d + " loaded");
+				//console.log("Data from Sensor " + d + " loaded");
 				if (--end === 0) {
-					console.log("Loaded");
+					console.log("Loaded : " + sensorsToLoad + ".");
 					endLoadingBar();
 					
 					updateOptions(advanced);
@@ -158,26 +187,18 @@ var dateKey = "Created";
 	};
 	
 	/*
-	//Keep image scale and center it
-	if (imgWidth / dimension.x > imgHeight / dimension.y) {
-		dimensionImg.x = dimension.x;
-		dimensionImg.y = imgHeight / imgWidth * dimension.x;
-		offsetImg.top = (dimension.y - dimensionImg.y) / 2;
-	} else {
-		dimensionImg.y = dimension.y;
-		dimensionImg.x = imgWidth / imgHeight * dimension.y;
-		offsetImg.left = (dimension.x - dimensionImg.x) / 2;
-	}
-*/
-
-	/*
 	*	Displaying the data
 	*/
 	
-	var minScale, maxScale, colorScale, svg, active = false, numRepresentation = 0, frame, frameEnd, step, frameBegin, scalingPeriod, numMes, startTime, speed;
-	var colors = ['blue', '#27f600', 'yellow','orange','red'];
+	var colors = ['blue', '#27f600', 'yellow','orange','red'],
+		minScale, maxScale, colorScale,
+		svg,
+		active = false,
+		frameBegin, frame, frameEnd,
+		step, scalingPeriod, speed,
+		ct;
 	
-	//Find extent over specific period of time around a given time
+	// Find extent over specific period of time around a given time
 
 	var findExtent = function (frameTime) {
 		var extentTime = [frameBegin, frameEnd],
@@ -287,14 +308,13 @@ var dateKey = "Created";
 	// Initializing ...
 
 	var initialize = function () {
-		var minDate = startTime = d3.min(data.values(), function (c) { return d3.min(c.get(dateKey)); }),
+		var minDate = d3.min(data.values(), function (c) { return d3.min(c.get(dateKey)); }),
 			maxDate = d3.max(data.values(), function (c) { return d3.max(c.get(dateKey)); });
 		data.time = d3.range(minDate.getTime(), maxDate.getTime(), 60000);
 		
 		step = parseInt(document.getElementById('step').value, 10);
 		scalingPeriod = parseInt(document.getElementById('scalingPeriod').value, 10);
 		speed = parseInt(document.getElementById('speed').value, 10);
-		numMes = parseInt(document.getElementById('measurements').value, 10);
 		
 		active = false;
 		
@@ -337,6 +357,11 @@ var dateKey = "Created";
 			}
 		});
 		
+		d3.select('#reset').attr('disabled', null);
+		d3.select('#launch').attr('disabled', null);
+		d3.select('#reload').attr('disabled', null);
+		d3.select('#date').html("Press launch to start");
+		
 		initialized = true;
 	};
 	
@@ -344,81 +369,85 @@ var dateKey = "Created";
 		if (initialized)
 			return;
 		
+		new Pikaday({
+			field: document.getElementById('datepicker'),
+			firstDay: 1,
+			minDate: new Date('2014-06-01'),
+			maxDate: new Date(),
+			yearRange: 1,
+			use24hour: true,
+			defaultDate : date,
+			setDefaultDate : true,
+			onClose : function () {
+				if ((~~(+this.getDate() - +date) / 100000) != 0) {
+					date = this.getDate();
+				}
+			}
+		});
+		
 		// Listen to Launch/Pause Button
 
-		var launchButton = document.getElementById('launch');
-		launchButton.addEventListener('click', function () {
-			if (active === false) {
-				launchButton.innerHTML = 'Pause';
-				launch();
+		d3.select('#launch')
+		.on('click', function () {
+			if (active) {
+				pause();
 			} else {
-				active = false;
-				launchButton.innerHTML = 'Start';
+				launch();
 			}
 		}, true);
-		d3.select('#launch').attr('disabled', null);
 		 
 		// Listen to Reset Button
 	
-		var resetButton = document.getElementById('reset');
-		resetButton.addEventListener('click', function () {
-				launchButton.innerHTML = 'Launch';
-				active = false;
-				frame = frameBegin;
-		}, true);
-		d3.select('#reset').attr('disabled', null);
+		d3.select('#reset')
+		.on('click', function () {
+			pause();
+			d3.select('#launch').html('Launch');
+			frame = frameBegin;
+		}, true); 
+		
+		// Listen to Reload Button
+	
+		d3.select('#reload')
+		.on('click', reload, true);
 		
 		// Listen to speed input
 		
-		var speedInput = document.getElementById('speed');
-		speedInput.addEventListener('change', function () {
-			speed = (parseInt(speedInput.value, 10) > 0)? speedInput.value : speed;
-			speed = parseInt(speed, 10);
+		d3.select('#speed')
+		.on('change', function () {
+			speed = (parseInt(this.value, 10) > 0)? parseInt(this.value, 10) : speed;
 			if (active)
 				launch(frame);
 		}, true);
 		 
 		// Listen to step input
 		
-		var stepInput = document.getElementById('step');
-		stepInput.addEventListener('change', function () {
-			step = (parseInt(stepInput.value, 10) > 0)? stepInput.value : step;
-			step = parseInt(step, 10);
+		d3.select('#step')
+		.on('change', function () {
+			step = (parseInt(this.value, 10) > 0) ? parseInt(this.value, 10) : step;
 			if (active)
 				launch(frame);
 		}, true);
 		 
 		// Listen to number of measurements input
 		
-		var mesInput = document.getElementById('measurements');
-		mesInput.addEventListener('change', function () {
-			numMes = (parseInt(mesInput.value, 10) >= 10)? mesInput.value : numMes;
-			numMes = parseInt(numMes, 10);
-			
-			launchButton.innerHTML = 'Launch';
-			active = false;
-			clearTimeout(ct);
-			
-			d3.selectAll("svg").remove();
-			loadData(serverAddress, sensorsToLoad);
+		d3.select('#measurements')
+		.on('change', function () {
+			numberOfPointsToLoad = (parseInt(this.value, 10) >= 10)? parseInt(this.value, 10) : numberOfPointsToLoad;
 		}, true);
 		
 		// Listen to the time scale form
 		
-		var scalingList= document.getElementById('scalingPeriod');
-		scalingList.addEventListener('change', function () {
-			scalingPeriod = +scalingList.options[scalingList.selectedIndex].value;
+		d3.select('#scalingPeriod')
+		.on('change', function () {
+			scalingPeriod = +this.options[this.selectedIndex].value;
 			updateScale(frame);
 		}, true);
 		
-		//Select initial property selected
-		//d3.select('#Properties option:nth-child(' + 1 + ')').attr('selected','selected');
-
 		// Listen to the property form
 		
-		var propertyList = document.getElementById('property');
-		propertyList.addEventListener('change', function () {
-			property = propertyList.options[propertyList.selectedIndex].value;
+		d3.select('#property')
+		.on('change', function () {
+			property = this.options[this.selectedIndex].value;
 			interpolData();
 			updateScale(frame);
 		}, true);
@@ -441,6 +470,23 @@ var dateKey = "Created";
 			.each(function (d) { if (d === property) { this.selected = "selected"; }});
 	};
 	
+	var reload = function () {
+		pause();
+		d3.selectAll("svg").remove();
+		d3.select('#reset').attr('disabled', true);
+		d3.select('#launch').attr('disabled', true);
+		d3.select('#reload').attr('disabled', true);
+		d3.select('#date').html("Loading...");
+		loadData(serverAddress, sensorsToLoad);
+	};
+	
+	var pause = function () {
+		var launchButton = document.getElementById('launch');
+		launchButton.innerHTML = 'Start';
+		active = false;
+		clearTimeout(ct);
+	};
+	
 	// Launch representation
 	
 	var launch = function (begin) {
@@ -448,15 +494,21 @@ var dateKey = "Created";
 			clearTimeout(ct);
 		}
 		
+		var launchButton = document.getElementById('launch');
+		launchButton.innerHTML = 'Pause';
+		
 		active = true;
 		begin = typeof begin === "undefined" ? frame : +begin;
 		
 		var callback = function () {
-			if (frame + 1 >= data.time.length) {
+			if (frame === data.time.length - 1) {
 				active = false;
 				return;
+			} else if (frame + step >= data.time.length) {
+				createRepresentation(frame = data.time.length - 1, callback);
+			} else {
+				createRepresentation(frame += step, callback);
 			}
-			createRepresentation(++frame, callback);
 		};
 		
 		createRepresentation(begin, callback);
@@ -470,17 +522,17 @@ var dateKey = "Created";
 		
 		ct = setTimeout(callback, speed);
 		
-		var circles, lineH, lineV, stop, gr, text;
+		var circles, lineH, lineV, stop, gr, g, text;
 		// Redraw Scale depending on the scaling period
 		updateScale(frame);
 		
 		// Display time and extent of displayed property
 		var ext = d3.extent(data.values(), function (d) { return d.current[time] === false ? undefined : d.current[time]; });
-		d3.select('#date').text(new Date(data.time[time]) + ' | (' + formatValue(ext[0]) + "," + formatValue(ext[1])  + ')');
+		d3.select('#date').text(new Date(data.time[time]).toLocaleString() + ' - (' + formatValue(ext[0]) + "," + formatValue(ext[1])  + ')');
 		
 		// Update radial gradient
-		
-		gr = svg.select('g#plot').selectAll('.rg').data(data.values());
+		g = svg.select('g#plot');
+		gr = g.selectAll('.rg').data(data.values());
 
 		gr.enter().append('radialGradient').classed('rg', true)                
 			.attr('id', function (d,i) { return 'area-gradient' + i; })
@@ -500,24 +552,26 @@ var dateKey = "Created";
 			.attr('stop-opacity', function (d) { return d.opacity; })
 			.attr('stop-color', 'white');
 
-		svg.selectAll('.rg').selectAll('stop').transition().duration(speed).attr('stop-color', function (d,i,j) { return  data.get(sensorsToLoad[j]).current[time] !== false ? colorScale(data.get(sensorsToLoad[j]).current[time]) : "white"; });
+		gr.selectAll('stop').transition().duration(speed).attr('stop-color', function (d,i,j) { return  data.get(sensorsToLoad[j]).current[time] !== false ? colorScale(data.get(sensorsToLoad[j]).current[time]) : "white"; });
 		
 		// Update circles
 
-		circles = svg.selectAll('circle').data(data.values());
+		circles = g.selectAll('circle').data(data.values());
 
 		circles.enter().append('circle')
 			.style('opacity', 0)
 			.attr('cx', function (d) { return d.position[0]; })
 			.attr('cy', function (d) { return d.position[1]; })
-			.attr('r', radius);
-
+			.attr('r', radius)
+			.append('title');
+			
+		circles.selectAll("title").html(function (d, j) { return data.get(sensorsToLoad[j]).current[time] || "Unknown"; });
 		circles.style('fill', function (d,j) { return 'url(#area-gradient' + j +')'; }).transition().duration(speed).style("opacity", function (d, j) { return data.get(sensorsToLoad[j]).current[time] !== false ? 0.8 : 0; });
-
+		
 		// Draw crosses representing the nodes
-		lineH = svg.selectAll('.horizontal').data(data.values());
-		lineV = svg.selectAll('.vertical').data(data.values());
-		text = svg.selectAll('.number').data(data.entries());
+		lineH = g.selectAll('.horizontal').data(data.values());
+		lineV = g.selectAll('.vertical').data(data.values());
+		text = g.selectAll('.number').data(data.entries());
 
 		lineH.enter().append('line').classed('horizontal', true)
 			.attr('x1', function (d) { return d.position[0] + 5; })
@@ -539,19 +593,19 @@ var dateKey = "Created";
 			.attr('x', function (d) { return d.value.position[0]; })
 			.attr('y', function (d) { return d.value.position[1]; })
 			.attr('text-anchor', 'middle')
-			.attr('alignment-baseline', 'middle')
+			.attr('alignment-baseline', 'central')
 			.attr("transform", function (d) {
+				var c = corners.indexOf(d.key) >= 0 ? 1.5 : 1;
 				var p = d.value.position;
 				var center = toScreen([roomX / 2, roomY / 2]);
 				var offsets = [center[0] - p[0], center[1] - p[1]];
 				var angle = -Math.atan2(offsets[0], offsets[1]) / Math.PI * 180 + (offsets[1] < 0 ? 180 : 0);
-				var translation = normalize(offsets, radius / 2);
+				var translation = normalize(offsets, radius / 1.8 * c);
 				return "translate(" + translation + ")rotate(" + angle + "," + d.value.position.slice(0,2) + ")";
 			})
-			.attr('dy', function (d) { return d.key === 137 ? -5 : 0})
+			.attr('dy', function (d) { return d.key === center ? -radius/1.8 : 0})
 			.text(function (d,i) { return d.key; });
 	};
 		
-/*
+
 })();
-//*/
